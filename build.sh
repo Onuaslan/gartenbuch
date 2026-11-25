@@ -8,6 +8,7 @@ OUT=build
 rm -rf "$OUT"; mkdir -p "$OUT/classes"
 
 # 1) Assets frisch aus dem Artifact erzeugen
+mkdir -p app/assets
 python3 patch_html.py src/index.orig.html app/assets/index.html
 
 # 2) Java -> Class -> DEX (Java-8-Bytecode, keine Lambdas)
