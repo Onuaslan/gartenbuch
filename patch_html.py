@@ -51,6 +51,8 @@ sub('Sie erkennt Krankheiten auf Fotos und erstellt für jede Pflanze einen Prof
     'Jeden Morgen sagt dir eine Nachricht, was heute zu tun ist. Mit eigenem API-Schlüssel erkennt sie auch Krankheiten auf Fotos und schreibt dir Pflegepläne.')
 sub('Damit holt die App das Wetter für deinen Ort.', 'Damit holt die App das Wetter für deinen Ort (Internet nötig).')
 
+sub('autocomplete="street-address"', 'autocomplete="off"', 2)
+
 # 5) Icon, Einstellungen-Knopf, Sheet, Klick-Fälle, Render-Hook
 sub('/* ---------- helpers ---------- */',
     '''I.sliders = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>';
@@ -78,17 +80,22 @@ async function fetchJSON(url, ms){
   try { const r = await fetch(url, {signal: ctl.signal}); if (!r.ok) throw new Error("http " + r.status); return await r.json(); }
   finally { clearTimeout(t); }
 }
+const COUNTRY_WORD = /^(österreich|oesterreich|austria|deutschland|germany|schweiz|switzerland|türkei|türkiye|turkey|at|de|ch|tr)$/i;
+function geoCandidates(address){
+  const a = str(address).replace(/\s+/g, " ");
+  const toks = a.replace(/[,;()]/g, " ").split(" ").map(w => w.replace(/^[-–.]+|[-–.]+$/g, "")).filter(w => w && !/\d/.test(w) && !COUNTRY_WORD.test(w));
+  const names = [], add = n => { n = n.trim(); if (n.length >= 2 && !names.includes(n)) names.push(n); };
+  add(toks.join(" "));
+  for (let i = 1; i < Math.min(toks.length, 4); i++) add(toks.slice(i).join(" "));
+  for (let n = toks.length - 1; n >= 1; n--) add(toks.slice(0, n).join(" "));
+  toks.forEach(add);
+  return names.slice(0, 8);
+}
 async function geocodeAddress(address){
   const a = str(address).replace(/\s+/g, " "), plz = (a.match(/\b\d{4,5}\b/) || [])[0] || "";
-  const names = [];
-  if (plz){ const after = a.slice(a.indexOf(plz) + plz.length).replace(/^[\s,]+/, "").trim(); if (after) names.push(after); }
-  a.split(",").map(s => s.trim()).filter(s => s && !/\d/.test(s)).forEach(s => names.push(s));
-  if (!names.length){ const n = a.replace(/\d+/g, " ").replace(/\s+/g, " ").trim(); if (n) names.push(n); }
-  const seen = new Set();
-  for (const name of names){
-    if (seen.has(name)) continue; seen.add(name);
+  for (const name of geoCandidates(a)){
     const j = await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?count=10&language=de&format=json&name=" + encodeURIComponent(name));
-    const rs = arr(j && j.results); if (!rs.length) continue;
+    const rs = arr(j && j.results).filter(r => !/^(ADM|PCL|CONT|RGN|TERR)/.test(r.feature_code || "")); if (!rs.length) continue;
     return (plz && rs.find(r => arr(r.postcodes).includes(plz))) || rs.find(r => r.country_code === "AT") || rs[0];
   }
   return null;
@@ -106,7 +113,7 @@ async function fetchWeatherOM(quiet){
     if (!(isFinite(lat) && isFinite(lon) && lat && lon && S.loc.geoFor === addr)){
       const hit = await geocodeAddress(addr);
       if (!hit){
-        S.loc = {...S.loc, status: "error", statusText: "Den Ort kenne ich nicht. Gib Postleitzahl und Ort ein, z. B. „2253 Weikendorf“."};
+        S.loc = {...S.loc, status: "error", statusText: "Den Ort kenne ich nicht. Gib am besten nur den Ortsnamen ein, z. B. „Weikendorf“."};
         store.set("garten.loc", S.loc); render(); return;
       }
       lat = hit.latitude; lon = hit.longitude; label = hit.name;
