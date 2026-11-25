@@ -58,6 +58,8 @@ public class MainActivity extends Activity {
         s.setBuiltInZoomControls(false);
         s.setGeolocationEnabled(false);
 
+        web.addJavascriptInterface(new Bridge(this, this, null), "Android");
+
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -158,6 +160,14 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == Bridge.REQ_NOTIFICATIONS && web != null) {
+            web.evaluateJavascript("window.__remChanged&&window.__remChanged()", null);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         final Activity self = this;
         web.evaluateJavascript(
@@ -178,6 +188,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (web != null) web.onResume();
+        Reminder.schedule(this);
     }
 
     @Override

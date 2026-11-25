@@ -1,6 +1,6 @@
 # Gartenbuch
 
-Garten-App für Android: Gießplan nach Wetter, Frostwarnungen, Gartenkalender, Einkaufsliste, Erntetagebuch und Fotos zu jeder Pflanze.
+Garten-App für Android: Gießplan nach Wetter, Frostwarnungen, Gartenkalender, Einkaufsliste, Erntetagebuch, Foto-Diagnose, Pflegepläne und eine Morgen-Nachricht, was heute zu tun ist.
 Designed & coded by Onur Kabasakal.
 
 ## Installieren
@@ -11,9 +11,16 @@ Designed & coded by Onur Kabasakal.
 
 Voraussetzung: Android 6 oder neuer. Für das Wetter ist Internet nötig (Open-Meteo). Alle Daten bleiben auf dem Handy.
 
-## Nicht enthalten
+## Morgen-Nachricht
 
-Foto-Diagnose, automatischer Pflegeplan und Beetplan-Vorschläge. Sie brauchen Claude und gibt es nur in der Claude-Version der App.
+Oben rechts auf das Einstellungen-Symbol tippen, „Nachricht aktivieren“ einschalten, Uhrzeit wählen. Mit „Test jetzt senden“ prüfst du sofort, ob alles klappt.
+Die Nachricht nennt: Gießen mit Menge, Frostwarnung, Krankheitsgefahr, Aufgaben des Monats.
+Android kann sie um einige Minuten verschieben. Ab Android 13 fragt die App einmal nach der Erlaubnis für Benachrichtigungen.
+
+## Foto-Diagnose, Pflegeplan, Beetplan
+
+Diese Funktionen brauchen einen eigenen Anthropic-API-Schlüssel (console.anthropic.com, „API keys“, Guthaben nötig).
+Schlüssel in den Einstellungen eintragen. Er bleibt nur auf dem Handy, die Abrechnung läuft über das Guthaben dort. Ohne Schlüssel läuft alles andere normal.
 
 ## Selbst bauen
 
