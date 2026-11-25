@@ -257,7 +257,29 @@ function settingsSheet(head){
     </div>`;
 }
 '''
-sub('/* ---------- boot ---------- */', BLOCK + '\n/* ---------- boot ---------- */')
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
+MAPJS = open(os.path.join(HERE, "src", "gartenkarte.js"), encoding="utf-8").read()
+MAPCSS = open(os.path.join(HERE, "src", "gartenkarte.css"), encoding="utf-8").read()
+sub('/* ---------- boot ---------- */', BLOCK + "\n" + MAPJS + '\n/* ---------- boot ---------- */')
+sub('\n</style>', MAPCSS + '\n</style>')
+
+# 7) Gartenkarte: Umschalter Liste/Karte, Sheets, Klick-Fälle, Start
+sub('function viewGarten(){', 'function viewGarten(){ return S.mode !== "loading" && S.gview === "karte" ? viewMap() : viewGartenList(); }\nfunction viewGartenList(){')
+sub('    ${banner}\n    ${S.plants.length ? `<div class="tools">', '    ${banner}${gToggle()}\n    ${S.plants.length ? `<div class="tools">')
+sub('  } else if (S.sheet.type === "help"){',
+    '''  } else if (S.sheet.type === "mapadd"){ inner = mapAddSheet(head);
+  } else if (S.sheet.type === "mapitem"){ inner = mapItemSheet(head); if (!S.sheet) return;
+  } else if (S.sheet.type === "maplot"){ inner = mapLotSheet(head);
+  } else if (S.sheet.type === "mapai"){ inner = mapAiSheet(head);
+  } else if (S.sheet.type === "help"){''')
+sub('    case "tab": setTab(b.dataset.tab); break;',
+    '''    case "tab": setTab(b.dataset.tab); break;
+    case "gview": case "map-sel": case "map-desel": case "map-add": case "map-new": case "map-edit": case "map-dup": case "map-zoom": case "map-lot": case "map-lot-first": case "map-lot-save":
+    case "map-clear": case "map-clear-no": case "map-clear-yes": case "map-import": case "map-item-save": case "map-item-del": case "map-item-del-no": case "map-item-del-yes":
+    case "map-ai": case "map-ai-go": case "map-ai-stop": mapAct(a, b); break;''')
+sub('  renderTabs();\n  if (S.sheet && ["plant"', '  renderTabs(); mapAfterRender();\n  if (S.sheet && ["plant"')
+sub('S.weather = store.get("garten.weather") || null;', 'S.weather = store.get("garten.weather") || null; S.map = mapNormalize(store.get("garten.map")); S.gview = store.get("garten.gview") === "karte" ? "karte" : "liste";')
 
 open(dst, "w", encoding="utf-8").write(h)
 left = [l for l in h.splitlines() if re.search(r"Claude-App|claude\.ai", l)]

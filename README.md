@@ -1,6 +1,6 @@
 # Gartenbuch
 
-Garten-App für Android: Gießplan nach Wetter, Frostwarnungen, Gartenkalender, Einkaufsliste, Erntetagebuch, Foto-Diagnose, Pflegepläne und eine Morgen-Nachricht, was heute zu tun ist.
+Garten-App für Android: Gießplan nach Wetter, Frostwarnungen, Gartenkalender, Einkaufsliste, Erntetagebuch, Gartenkarte, Foto-Diagnose, Pflegepläne und eine Morgen-Nachricht, was heute zu tun ist.
 Designed & coded by Onur Kabasakal.
 
 ## Installieren
@@ -16,6 +16,10 @@ Voraussetzung: Android 6 oder neuer. Für das Wetter ist Internet nötig (Open-M
 Oben rechts auf das Einstellungen-Symbol tippen, „Nachricht aktivieren“ einschalten, Uhrzeit wählen. Mit „Test jetzt senden“ prüfst du sofort, ob alles klappt.
 Die Nachricht nennt: Gießen mit Menge, Frostwarnung, Krankheitsgefahr, Aufgaben des Monats.
 Android kann sie um einige Minuten verschieben. Ab Android 13 fragt die App einmal nach der Erlaubnis für Benachrichtigungen.
+
+## Gartenkarte
+
+Im Reiter Garten oben auf „Karte“ tippen. Grundstücksmaße eingeben, dann Haus, Terrasse, Beete, Bäume und Einzelpflanzen mit Breite, Länge und Abstand hinzufügen. Elemente lassen sich ziehen, per Punkt unten rechts vergrößern und mit der Bepflanzung beschriften. Pflanzen aus der Liste können verknüpft werden. Mit API-Schlüssel kann man die Karte auch per Text beschreiben lassen („Hochbeet 1,2 × 2,4 m hinten links mit Tomaten“). Unter „Grundstück und Daten“ lässt sich die Karte als Text sichern und wieder laden.
 
 ## Foto-Diagnose, Pflegeplan, Beetplan
 
