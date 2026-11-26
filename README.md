@@ -45,3 +45,5 @@ Wer eine bestehende Installation aktualisieren will, muss mit **demselben** Schl
 ## Aufgaben (ab v2.1)
 
 „Heute zu tun“ ist eine echte Abhak-Liste mit Fortschrittsbalken: Gießen (Haken setzt die Pflanze als gegossen, Rückgängig stellt sie wieder her), Frostschutz, Pflanzen mit Auffälligkeit prüfen, Monatsaufgaben aus der Gartenkarte (bleiben bis zum Abhaken stehen, auch im Kalender) und eigene Aufgaben mit Datum und Wiederholung (wöchentlich, 2-wöchentlich, monatlich).
+
+Die Morgen-Benachrichtigung (ab v2.2) nennt die offenen Aufgaben von heute, z. B. „4 Aufgaben heute: Beete abdecken, Monstera gießen …“, dazu Wetter und Warnungen. Erledigte Aufgaben fehlen darin.

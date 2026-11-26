@@ -1832,22 +1832,32 @@ function remState(){
   try { return {native: true, ...JSON.parse(a.getReminder())}; } catch { return {native: false}; }
 }
 const cut = (s, n) => { s = str(s); return s.length > n ? s.slice(0, n - 1).trim() + "…" : s; };
+function hasGardenData(){ tkLoad(); return S.plants.length > 0 || MAP().items.length > 0 || TK.todos.length > 0; }
+/* Morgen-Nachricht = offene Aufgaben von heute (dieselbe Liste wie auf „Heute“) */
 function morningText(){
-  const t = todayKey(), base = dailySummary(S.plants, t, shopOpen().length).split("\n"), m = parseKey(t).getMonth(), tips = [];
-  S.plants.forEach(p => { const j = p.plan && arr(p.plan.jetzt)[0]; if (j) tips.push(`${p.name}: ${cut(j, 120)}`); });
-  if (!tips.length){
-    if (S.plants.some(isLawn)) tips.push("Rasen: " + cut(CAL[m].r, 130));
-    if (S.plants.some(p => p.area === "beet")) tips.push("Gemüse: " + cut(CAL[m].g, 130));
-    if (S.plants.some(p => p.area === "kuebel" || (AREAS[p.area] || {}).indoor)) tips.push("Kübel & Drinnen: " + cut(CAL[m].k, 130));
+  const t = todayKey(), d = parseKey(t), base = dailySummary(S.plants, t, shopOpen().length).split("\n"), m = d.getMonth();
+  const open = tkList().open, n = open.length, tw = WX.find(x => x.date === t);
+  const short = x => x.title.replace(/ mit Vlies abdecken$/, " abdecken").replace(/ ins Haus oder in die Garage stellen$/, " reinstellen");
+  const head = n ? `${n} ${n === 1 ? "Aufgabe" : "Aufgaben"} heute: ${open.slice(0, 3).map(short).join(", ")}${n > 3 ? " …" : ""}` : `Heute keine Aufgaben (${WDL[d.getDay()]}, ${d.getDate()}. ${MON[d.getMonth()]})`;
+  const lines = open.slice(0, 7).map(x => `☐ ${x.title}${x.sub ? " – " + cut(x.sub, 70) : ""}`);
+  if (n > 7) lines.push(`+ ${n - 7} weitere in der App`);
+  if (!n) lines.push(S.plants.length ? "Heute muss nichts gegossen werden." : "Trage Pflanzen oder Aufgaben ein, dann erinnert dich die App hier.");
+  if (tw && isFinite(tw.min) && isFinite(tw.max)) lines.push(`Wetter: ${nf0.format(tw.min)} bis ${nf0.format(tw.max)} °C`);
+  base.slice(1).filter(l => !/^(Gießen:|Heute muss nichts|Frost )/.test(l)).forEach(l => lines.push(l));
+  if (n < 3 && S.plants.length){
+    const tips = [];
+    S.plants.forEach(p => { const j = p.plan && arr(p.plan.jetzt)[0]; if (j) tips.push(`${p.name}: ${cut(j, 120)}`); });
+    if (!tips.length && S.plants.some(isLawn)) tips.push("Rasen: " + cut(CAL[m].r, 130));
+    tips.slice(0, 2).forEach(x => lines.push(x));
   }
-  return {title: base[0], text: base.slice(1).concat(tips.slice(0, 3)).join("\n")};
+  return {title: cut(head, 80), text: lines.join("\n")};
 }
 let syncT;
 function syncSummary(){
   clearTimeout(syncT);
   syncT = setTimeout(() => {
     const a = AND(); if (!a || typeof a.saveSummary !== "function" || S.mode !== "local") return;
-    try { prepWeather(); const m = S.plants.length ? morningText() : {title: "", text: ""}; a.saveSummary(todayKey(), m.title || "", m.text || ""); } catch {}
+    try { prepWeather(); const m = hasGardenData() ? morningText() : {title: "", text: ""}; a.saveSummary(todayKey(), m.title || "", m.text || ""); } catch {}
   }, 1500);
 }
 function testNow(){ const a = AND(); if (a){ syncSummary(); a.testNow(); toast("Test läuft – die Nachricht kommt in wenigen Sekunden"); } }
@@ -1857,7 +1867,7 @@ window.__morning = async function(){
     if (S.mode === "loading") goLocal();
     if (S.loc && S.loc.address && S.loc.status !== "error" && weatherStale()) await Promise.race([loadWeatherOM(true), new Promise(r => setTimeout(r, 3500))]);
     prepWeather();
-    return JSON.stringify(S.plants.length ? morningText() : {});
+    return JSON.stringify(hasGardenData() ? morningText() : {});
   } catch (e){ return "{}"; }
 };
 window.__remChanged = () => { if (S.sheet && S.sheet.type === "settings") renderSheet(); };
