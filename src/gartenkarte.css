@@ -87,27 +87,43 @@
 body.gk-isfull{overflow:hidden}
 body.gk-isfull .tabbar{display:none}
 .gk-full{position:fixed;inset:0;z-index:30;background:var(--ground);display:flex;flex-direction:column;color:var(--ink)}
-.gk-ftop{flex:none;height:48px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 8px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bar,var(--ground));overflow-x:auto;scrollbar-width:none}
+.gk-ftop{flex:none;height:44px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 8px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bar,var(--ground));overflow-x:auto;scrollbar-width:none}
 .gk-ftop::-webkit-scrollbar{display:none}
-.gk-fb{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface-2);color:var(--ink);border-radius:999px;height:36px;padding:0 12px;font-weight:600;font-size:14px;white-space:nowrap}
-.gk-fb svg{width:19px;height:19px;flex:none}
-.gk-fb.ic{width:36px;padding:0;justify-content:center;font-size:20px;line-height:1}
+.gk-fb{flex:none;display:inline-flex;align-items:center;gap:5px;border:0;background:var(--surface-2);color:var(--ink);border-radius:999px;height:32px;padding:0 11px;font-weight:600;font-size:13px;white-space:nowrap}
+.gk-fb svg{width:17px;height:17px;flex:none}
+.gk-fb.ic{width:32px;padding:0;justify-content:center;font-size:20px;line-height:1}
 .gk-fb:disabled{opacity:.4}
 .gk-ft{display:flex;flex-direction:column;line-height:1.15;min-width:0;flex:none;margin-left:4px}
-.gk-ft b{font-size:14px;white-space:nowrap}
-.gk-ftop .gk-compass{width:30px;height:30px;color:var(--ink-2);flex:none}
+.gk-ft b{font-size:13px;white-space:nowrap}
+.gk-ftop .gk-compass{width:26px;height:26px;color:var(--ink-2);flex:none}
 .gk-fsp{flex:1;min-width:4px}
 .gk-fz{display:flex;align-items:center;gap:2px;flex:none}
 .gk-fz .gk-zl{min-width:44px;text-align:center}
 .gk-fbody{position:relative;flex:1;min-height:0}
 .gk-fbox{position:absolute;inset:0;border-radius:0;overscroll-behavior:contain;max-height:none}
-.gk-fpanel{position:absolute;z-index:5;right:8px;top:8px;bottom:8px;width:min(330px,46%);overflow:auto;border-radius:18px;box-shadow:0 4px 22px rgba(0,0,0,.4);-webkit-overflow-scrolling:touch}
+.gk-fpanel{position:absolute;z-index:5;right:8px;top:8px;bottom:8px;width:min(272px,36%);overflow:auto;border-radius:16px;box-shadow:0 4px 22px rgba(0,0,0,.4);-webkit-overflow-scrolling:touch}
 .gk-fpanel .gk-panel{margin:0;min-height:100%;box-sizing:border-box}
 @media (orientation:portrait){
   .gk-fpanel{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46%}
   .gk-fpanel .gk-panel{min-height:0}
 }
-@media (max-width:920px){.gk-fb:not(:first-child) span{display:none}.gk-fb:not(:first-child){padding:0;width:36px;justify-content:center}}
-@media (max-width:640px){.gk-ft{display:none}.gk-fb:first-child span{display:none}.gk-fb:first-child{padding:0;width:36px;justify-content:center}}
+@media (max-width:920px){.gk-fb:not(:first-child) span{display:none}.gk-fb:not(:first-child){padding:0;width:32px;justify-content:center}}
+@media (max-width:640px){.gk-ft{display:none}.gk-fb:first-child span{display:none}.gk-fb:first-child{padding:0;width:32px;justify-content:center}}
 .gk-fpanel.l{right:auto;left:8px}
 @media (orientation:portrait){.gk-fpanel.t{top:8px;bottom:auto}.gk-fpanel.l{right:8px}}
+
+/* Vollbild: Infofenster kompakt */
+.gk-fpanel .gk-panel{padding:10px 12px;gap:8px;font-size:13px;border-radius:16px}
+.gk-fpanel .gk-panel h3{font-size:16px;margin:2px 0 0}
+.gk-fpanel .gk-panel .mono{font-size:11px}
+.gk-fpanel .gk-panel .btn.sm{min-height:32px;padding:5px 11px;font-size:13px}
+.gk-fpanel .gk-rwb{min-height:40px;padding:5px 4px;gap:8px}
+.gk-fpanel .gk-rn{width:22px;height:22px;font-size:12px}
+.gk-fpanel .gk-rw.sel .btn-row{margin-left:30px!important}
+.gk-fpanel .gk-rw.sel p{margin-left:30px!important}
+.gk-fpanel .gk-hints li{font-size:12.5px}
+.gk-more summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-2);padding:6px 0;list-style:none}
+.gk-more summary::before{content:"▸ "}
+.gk-more[open] summary::before{content:"▾ "}
+.gk-more > *:not(summary){margin-top:8px}
+@media (orientation:portrait){.gk-fpanel{width:auto}}

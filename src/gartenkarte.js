@@ -157,11 +157,13 @@ function mapPanelHTML(){
   const it = S.mapSel && mapItem(S.mapSel);
   if (!it) return `<p class="hint">Tippe ein Element an. Ziehen verschiebt es, der blaue Punkt unten rechts ändert die Größe. Genaue Maße gibst du über „Bearbeiten“ ein.</p>`;
   const t = MTYPES[it.type], pl = it.pids.map(plantById).filter(Boolean), hints = mapHints(it), todo = cropTasks([it], new Date().getMonth() + 1);
+  const hintsH = hints.length ? `<ul class="gk-hints">${hints.map(h => `<li class="${h.k}"><b aria-hidden="true">${GKI[h.k]}</b><span>${esc(h.t)}</span></li>`).join("")}</ul>` : "";
+  const todoH = todo.length ? `<div><div class="lbl">Im ${MON[new Date().getMonth()]} hier zu tun</div><ul class="gk-hints">${todo.map(r => `<li class="info"><b aria-hidden="true">•</b><span><b style="display:inline">${esc(r.crop)}</b>: ${esc(r.text)}</span></li>`).join("")}</ul></div>` : "";
+  const moreH = S.full && (hintsH || todoH) ? `<details class="gk-more"><summary>Tipps und Hinweise${hints.some(h => h.k === "warn") ? " (!)" : ""}</summary>${hintsH}${todoH}</details>` : hintsH + todoH;
   return `<div class="card gk-panel"><div><div class="eyebrow">${esc(t.l)}</div><h3 style="margin-top:3px">${esc(it.name || t.l)}</h3><div class="muted small mono">${fm(it.w)} × ${fm(it.h)} m${t.round ? "" : " · " + fm(r2(it.w * it.h)) + " m²"} · ${fm(it.x)} m von links, ${fm(it.y)} m von oben</div></div>
     ${mapIsBed(it) ? rowsPanelHTML(it) : it.pl.length ? `<div class="gk-cc2">${it.pl.map(k => `<span><i style="background:${CROPS[k].c}"></i>${esc(CROPS[k].n)}</span>`).join("")}</div>` : ""}
     ${it.crops ? `<div><div class="lbl">Weiteres</div><div>${esc(it.crops)}</div></div>` : ""}
-    ${hints.length ? `<ul class="gk-hints">${hints.map(h => `<li class="${h.k}"><b aria-hidden="true">${GKI[h.k]}</b><span>${esc(h.t)}</span></li>`).join("")}</ul>` : ""}
-    ${todo.length ? `<div><div class="lbl">Im ${MON[new Date().getMonth()]} hier zu tun</div><ul class="gk-hints">${todo.map(r => `<li class="info"><b aria-hidden="true">•</b><span><b style="display:inline">${esc(r.crop)}</b>: ${esc(r.text)}</span></li>`).join("")}</ul></div>` : ""}
+    ${moreH}
     ${pl.length ? `<div class="chips">${pl.map(p => `<button class="chip" data-act="open" data-id="${esc(p.id)}">${I.leaf}${esc(p.name)}</button>`).join("")}</div>` : ""}
     ${it.note ? `<p class="muted small" style="margin:0">${esc(it.note)}</p>` : ""}
     <div class="btn-row"><button class="btn primary sm" data-act="map-edit" data-id="${esc(it.id)}">Bearbeiten</button><button class="btn sm" data-act="map-dup" data-id="${esc(it.id)}">Kopie</button><button class="btn ghost sm" data-act="map-desel">Fertig</button></div></div>`;

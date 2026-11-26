@@ -5,7 +5,7 @@ const GI = {
   rot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="7" width="7" height="10" rx="1.4"/><path d="M20 12a8 8 0 0 1-13.4 5.9M4 12a8 8 0 0 1 13.4-5.9"/><path d="M18 3.5l-.4 3 3 .4M6 20.5l.4-3-3-.4"/></svg>',
   book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M5 17a3 3 0 0 1 3-3h10M9 8h5"/></svg>'
 };
-const FTOP = 48;
+const FTOP = 44;
 let pinch = null, fullKey = "";
 const fullSizeKey = () => document.documentElement.clientWidth + "x" + document.documentElement.clientHeight;
 /* Nicht auf ein resize-Ereignis verlassen: WebViews melden die Drehung manchmal verspätet oder gar nicht */
