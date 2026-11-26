@@ -19,7 +19,7 @@ Android kann sie um einige Minuten verschieben. Ab Android 13 fragt die App einm
 
 ## Gartenkarte
 
-Im Reiter Garten oben auf „Karte“ tippen. Grundstücksmaße eingeben, dann Haus, Terrasse, Beete, Bäume und Einzelpflanzen mit Breite, Länge und Abstand hinzufügen. Elemente lassen sich ziehen, per Punkt unten rechts vergrößern und mit der Bepflanzung beschriften. Pflanzen aus der Liste können verknüpft werden. Mit API-Schlüssel kann man die Karte auch per Text beschreiben lassen („Hochbeet 1,2 × 2,4 m hinten links mit Tomaten“). Unter „Grundstück und Daten“ lässt sich die Karte als Text sichern und wieder laden.
+Im Reiter Garten oben auf „Karte“ tippen. Grundstücksmaße eingeben, dann Haus, Terrasse, Beete, Bäume und Einzelpflanzen mit Breite, Länge und Abstand hinzufügen. Die Karte zeichnet Rasen, Pflaster, Dach, Pool, Hochbeete und Bäume mit Schatten (Richtung nach Himmelsrichtung). Elemente lassen sich ziehen und per Punkt unten rechts vergrößern. Für Beete wählst du aus 40 Gemüse-, Kräuter-, Obst- und Blumenarten; sie werden im richtigen Pflanzabstand eingezeichnet. Die App zeigt Pflanzenzahl, gute und schlechte Nachbarn, Sonne/Schatten (grobe Schätzung) und Fruchtfolge. Fällige Aussaat-, Pflanz- und Erntearbeiten aus der Karte erscheinen auf „Heute“ und im Kalender. Mit API-Schlüssel kann man die Karte auch per Text beschreiben lassen. Unter „Grundstück und Daten“ lässt sich die Karte als Text sichern und wieder laden.
 
 ## Foto-Diagnose, Pflegeplan, Beetplan
 

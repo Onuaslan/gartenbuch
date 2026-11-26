@@ -259,10 +259,16 @@ function settingsSheet(head){
 '''
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-MAPJS = open(os.path.join(HERE, "src", "gartenkarte.js"), encoding="utf-8").read()
+MAPJS = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in ("pflanzen.js", "kartenzeichner.js", "gartenkarte.js"))
 MAPCSS = open(os.path.join(HERE, "src", "gartenkarte.css"), encoding="utf-8").read()
 sub('/* ---------- boot ---------- */', BLOCK + "\n" + MAPJS + '\n/* ---------- boot ---------- */')
-sub('\n</style>', MAPCSS + '\n</style>')
+DESIGNCSS = open(os.path.join(HERE, "src", "design.css"), encoding="utf-8").read()
+SPLASH = open(os.path.join(HERE, "src", "splash.html"), encoding="utf-8").read()
+sub('\n</style>', DESIGNCSS + MAPCSS + '\n</style>')
+sub('\n<div class="app">', SPLASH + '\n<div class="app">')
+sub('<link rel="preconnect" href="https://fonts.googleapis.com">\n', '')
+sub('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n', '')
+h = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>\n?', '', h)
 
 # 7) Gartenkarte: Umschalter Liste/Karte, Sheets, Klick-Fälle, Start
 sub('function viewGarten(){', 'function viewGarten(){ return S.mode !== "loading" && S.gview === "karte" ? viewMap() : viewGartenList(); }\nfunction viewGartenList(){')
@@ -277,10 +283,14 @@ sub('    case "tab": setTab(b.dataset.tab); break;',
     '''    case "tab": setTab(b.dataset.tab); break;
     case "gview": case "map-sel": case "map-desel": case "map-add": case "map-new": case "map-edit": case "map-dup": case "map-zoom": case "map-lot": case "map-lot-first": case "map-lot-save":
     case "map-clear": case "map-clear-no": case "map-clear-yes": case "map-import": case "map-item-save": case "map-item-del": case "map-item-del-no": case "map-item-del-yes":
-    case "map-ai": case "map-ai-go": case "map-ai-stop": mapAct(a, b); break;''')
+    case "map-ai": case "map-ai-go": case "map-ai-stop": case "map-open": mapAct(a, b); break;''')
+sub('  ${shopOpen().length ? `<button class="linkcard" data-act="shop">', '  ${mapTasksSection("Im Garten jetzt dran")}\n  ${shopOpen().length ? `<button class="linkcard" data-act="shop">')
+sub('    ${withPlan.length ? `<section class="sec"><div class="sec-head"><h2>In deinem Garten</h2>', '    ${mapTasksSection("Aus deiner Gartenkarte")}\n    ${withPlan.length ? `<section class="sec"><div class="sec-head"><h2>In deinem Garten</h2>')
 sub('  renderTabs();\n  if (S.sheet && ["plant"', '  renderTabs(); mapAfterRender();\n  if (S.sheet && ["plant"')
 sub('S.weather = store.get("garten.weather") || null;', 'S.weather = store.get("garten.weather") || null; S.map = mapNormalize(store.get("garten.map")); S.gview = store.get("garten.gview") === "karte" ? "karte" : "liste";')
 
+import shutil
+shutil.copytree(os.path.join(HERE, "src", "fonts"), os.path.join(os.path.dirname(os.path.abspath(dst)), "fonts"), dirs_exist_ok=True)
 open(dst, "w", encoding="utf-8").write(h)
 left = [l for l in h.splitlines() if re.search(r"Claude-App|claude\.ai", l)]
 print("Rest-Verweise auf Claude-App:", len(left))

@@ -28,7 +28,8 @@ function mapNormItem(o, m){
   const w = clamp(n(o.w, d.w), .1, m.w), h = clamp(n(o.h, d.h), .1, m.l);
   const x = clamp(n(o.x, 0), 0, m.w - w), y = clamp(n(o.y, 0), 0, m.l - h);
   return {id: str(o.id) || mapId(), type: t, name: str(o.name).slice(0, 60), x: r2(x), y: r2(y), w: r2(w), h: r2(h),
-    crops: str(o.crops).slice(0, 300), pids: arr(o.pids).map(str).filter(Boolean).slice(0, 30), note: str(o.note).slice(0, 500)};
+    crops: str(o.crops).slice(0, 300), pids: arr(o.pids).map(str).filter(Boolean).slice(0, 30), note: str(o.note).slice(0, 500),
+    pl: arr(o.pl).map(str).filter((k, i, a) => CROPS[k] && a.indexOf(k) === i).slice(0, 12), prev: FAM[o.prev] ? o.prev : ""};
 }
 function mapNormalize(o){
   o = o && typeof o === "object" ? o : {};
@@ -41,12 +42,12 @@ const mapSave = () => store.set("garten.map", S.map);
 const mapItem = id => MAP().items.find(i => i.id === id);
 const mapHasLot = () => MAP().w > 0 && MAP().l > 0;
 function mapPpm(){
-  const avail = Math.max(240, Math.min(document.documentElement.clientWidth, 560) - 32) - 6;
+  const avail = Math.max(240, Math.min(document.documentElement.clientWidth, 560) - 32) - 6 - GKM.L - GKM.R;
   return Math.max(2, avail / Math.max(1, MAP().w)) * (S.mapZoom || 1);
 }
-const gToggle = () => `<div class="seg" role="group" aria-label="Ansicht"><button data-act="gview" data-v="liste" ${S.gview !== "karte" ? 'aria-current="true"' : ""}>Liste</button><button data-act="gview" data-v="karte" ${S.gview === "karte" ? 'aria-current="true"' : ""}>Karte</button></div>`;
+const gToggle = () => `<div class="gk-seg" role="group" aria-label="Ansicht"><button data-act="gview" data-v="liste" ${S.gview !== "karte" ? 'aria-current="true"' : ""}>Liste</button><button data-act="gview" data-v="karte" ${S.gview === "karte" ? 'aria-current="true"' : ""}>Karte</button></div>`;
 function compassHTML(m){
-  return `<svg class="compass" viewBox="0 0 40 40" aria-label="Norden" role="img"><g transform="rotate(${-(+m.north || 0)} 20 20)"><circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-width="1.5"/><path d="M20 5l5 15h-10z" fill="var(--bad)"/><path d="M20 35l5-15h-10z" fill="currentColor" fill-opacity=".35"/><text x="20" y="14" font-size="8" font-weight="700" text-anchor="middle" fill="#fff" stroke="none">N</text></g></svg>`;
+  return `<svg class="gk-compass" viewBox="0 0 40 40" aria-label="Norden" role="img"><g transform="rotate(${-(+m.north || 0)} 20 20)"><circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-width="1.5"/><path d="M20 5l5 15h-10z" fill="var(--bad)"/><path d="M20 35l5-15h-10z" fill="currentColor" fill-opacity=".35"/><text x="20" y="14" font-size="8" font-weight="700" text-anchor="middle" fill="#fff" stroke="none">N</text></g></svg>`;
 }
 
 /* ----- Ansicht ----- */
@@ -67,37 +68,88 @@ function viewMap(){
         <div class="btn-row"><button class="btn primary" data-act="map-lot-first">${I.check}Karte anlegen</button><button class="btn" data-act="map-ai">${I.spark}Lieber per Text beschreiben</button></div>
       </div>`;
   }
-  const ppm = mapPpm(), W = m.w * ppm, H = m.l * ppm, gm = ppm >= 14 ? 1 : 5, zoom = S.mapZoom || 1;
+  const ppm = mapPpm(), W = m.w * ppm + GKM.L + GKM.R, H = m.l * ppm + GKM.T + GKM.B, zoom = S.mapZoom || 1;
   return `${head}
-    <div class="mapinfo"><span class="mono">${fm(m.w)} × ${fm(m.l)} m</span><span class="muted small">${nf0.format(m.w * m.l)} m²</span>${compassHTML(m)}
+    <div class="gk-info"><span class="gk-dim"><b class="mono">${fm(m.w)} × ${fm(m.l)} m</b><span class="muted small">${nf0.format(m.w * m.l)} m²</span></span>${compassHTML(m)}
       <span class="spacer"></span>
-      <button class="iconbtn sm" data-act="map-zoom" data-d="-1" aria-label="Verkleinern" ${zoom <= 1 ? "disabled" : ""}>−</button><span class="mono small zl">${Math.round(zoom * 100)} %</span><button class="iconbtn sm" data-act="map-zoom" data-d="1" aria-label="Vergrößern" ${zoom >= 4 ? "disabled" : ""}>+</button></div>
-    <div class="mapbox ${zoom > 1 ? "zoomed" : ""}" id="mapbox"><div class="mapcv" id="mapcv" style="width:${W}px;height:${H}px;background-size:${gm * ppm}px ${gm * ppm}px"><div id="mapitems">${mapItemsHTML()}</div></div></div>
-    <div class="mapscale muted small"><i style="width:${5 * ppm}px"></i>5 m · Raster ${gm} m</div>
+      <span class="gk-zoom"><button class="iconbtn sm" data-act="map-zoom" data-d="-1" aria-label="Verkleinern" ${zoom <= 1 ? "disabled" : ""}>−</button><span class="mono small gk-zl">${Math.round(zoom * 100)} %</span><button class="iconbtn sm" data-act="map-zoom" data-d="1" aria-label="Vergrößern" ${zoom >= 4 ? "disabled" : ""}>+</button></span></div>
+    <div class="gk-box ${zoom > 1 ? "zoomed" : ""}" id="mapbox"><div class="gk-cv" id="gk-cv" style="width:${W}px;height:${H}px">${mapCanvasHTML()}</div></div>
+    <div class="gk-scale muted small"><i style="width:${5 * ppm}px"></i>5 m · Raster 1 m</div>
     <div id="mappanel">${mapPanelHTML()}</div>
     <div class="btn-row"><button class="btn primary" data-act="map-add">${I.plus}Element hinzufügen</button><button class="btn" data-act="map-ai">${I.spark}Per Text eintragen</button></div>
     ${mapListHTML()}`;
 }
-function mapItemsHTML(){
+function mapCanvasHTML(){ return gkSvgHTML(MAP(), mapPpm()) + `<div id="mapitems">${mapHitsHTML()}</div><div id="gk-gripw">${mapGripHTML()}</div>`; }
+function mapHitsHTML(){
   const m = MAP(), ppm = mapPpm(), sel = S.mapSel;
-  const list = m.items.slice().sort((a, b) => MTYPES[a.type].z - MTYPES[b.type].z);
-  let out = list.map(it => {
-    const t = MTYPES[it.type], w = it.w * ppm, h = it.h * ppm;
-    const vert = w < 30 && w >= 14 && h >= 36, showName = (w >= 30 && h >= 16) || vert, showCrops = it.crops && w >= 44 && h >= 34;
-    const nm = it.name || t.l;
-    const nameLines = showName && !showCrops && h >= 46 ? 2 : 1, cropLines = clamp(Math.floor((h - 8 - (showName ? 16 : 0)) / 13), 1, 4);
-    return `<div class="mi${it.id === sel ? " sel" : ""}${t.round ? " round" : ""}${vert ? " vert" : ""}" data-mid="${esc(it.id)}" style="left:${it.x * ppm}px;top:${it.y * ppm}px;width:${w}px;height:${h}px;background:${t.c};color:${t.t};z-index:${t.z + (it.id === sel ? 10 : 0)}">${showName ? `<span class="ml" style="-webkit-line-clamp:${nameLines};${nameLines > 1 ? "white-space:normal" : ""}">${esc(nm)}</span>` : ""}${showCrops ? `<span class="mc" style="-webkit-line-clamp:${cropLines}">${esc(it.crops)}</span>` : ""}</div>`;
+  return gkOrdered(m).map(it => {
+    const t = MTYPES[it.type];
+    return `<div class="gk-hit${it.id === sel ? " sel" : ""}${t.round ? " round" : ""}" data-mid="${esc(it.id)}" style="left:${n1(GKM.L + it.x * ppm)}px;top:${n1(GKM.T + it.y * ppm)}px;width:${n1(it.w * ppm)}px;height:${n1(it.h * ppm)}px;z-index:${t.z + (it.id === sel ? 10 : 0)}"></div>`;
   }).join("");
-  const s = sel && mapItem(sel);
-  if (s) out += `<div class="mh" data-mh="${esc(s.id)}" style="left:${(s.x + s.w) * ppm - 14}px;top:${(s.y + s.h) * ppm - 14}px" aria-label="Größe ändern"></div>`;
+}
+function mapGripHTML(){
+  const s = S.mapSel && mapItem(S.mapSel), ppm = mapPpm();
+  return s ? `<div class="gk-grip" data-mh="${esc(s.id)}" style="left:${n1(GKM.L + (s.x + s.w) * ppm - 14)}px;top:${n1(GKM.T + (s.y + s.h) * ppm - 14)}px" aria-label="Größe ändern"></div>` : "";
+}
+/* ----- Sonne/Schatten (grob geschätzt) und Beet-Hinweise ----- */
+function gkHeight(it){
+  if (it.type === "haus") return 6.5;
+  if (it.type === "huette") return 2.6;
+  if (it.type === "baum") return clamp(2 + Math.max(it.w, it.h) * 1.1, 3, 14);
+  if (it.type === "strauch") return Math.max(it.w, it.h) / Math.min(it.w, it.h) >= 2.4 ? 1.8 : 1.3;
+  return 0;
+}
+function mapShade(it){
+  const m = MAP(), [sx, sy] = gkShadowVec(m), cs = m.items.filter(c => c.id !== it.id && gkHeight(c) > 0);
+  if (!cs.length) return {f: 0, by: ""};
+  const N = 5, cnt = {}; let tot = 0, hit = 0;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++){
+    const px = it.x + (i + .5) / N * it.w, py = it.y + (j + .5) / N * it.h; tot++;
+    for (const c of cs){
+      const L = gkHeight(c) * 1.1, st = Math.max(.25, L / 12); let inn = false;
+      for (let t = 0; t <= L && !inn; t += st){
+        const qx = px - sx * t, qy = py - sy * t;
+        inn = c.type === "baum" ? Math.pow((qx - c.x - c.w / 2) / (c.w / 2), 2) + Math.pow((qy - c.y - c.h / 2) / (c.h / 2), 2) <= 1 : qx >= c.x && qx <= c.x + c.w && qy >= c.y && qy <= c.y + c.h;
+      }
+      if (inn){ hit++; cnt[c.id] = (cnt[c.id] || 0) + 1; break; }
+    }
+  }
+  const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0], tc = top && mapItem(top);
+  return {f: hit / tot, by: tc ? (tc.name || MTYPES[tc.type].l) : ""};
+}
+function mapHints(it){
+  const out = [], keys = it.pl || []; if (!keys.length) return out;
+  const bed = it.type === "beet" || it.type === "hochbeet";
+  if (bed) cropLayout(Math.max(.1, it.w - 2 * gkWall(it)), Math.max(.1, it.h - 2 * gkWall(it)), keys).forEach(r => { const c = CROPS[r.key]; out.push({k: "info", t: `${c.n}: ca. ${r.count} ${r.count === 1 ? "Pflanze" : "Pflanzen"}, ${c.sp} cm Abstand${c.rw > c.sp ? `, ${c.rw} cm Reihenabstand` : ""}`}); });
+  const pr = cropPairs(keys);
+  pr.bad.forEach(([a, b]) => out.push({k: "warn", t: `${CROPS[a].n} und ${CROPS[b].n} vertragen sich schlecht. Besser in getrennte Beete.`}));
+  pr.good.slice(0, 3).forEach(([a, b]) => out.push({k: "ok", t: `${CROPS[a].n} und ${CROPS[b].n} sind gute Nachbarn.`}));
+  if (it.prev){
+    const same = keys.filter(k => CROPS[k].fam === it.prev);
+    if (same.length) out.push({k: "warn", t: `Letztes Jahr wuchs hier: ${FAM[it.prev]}. ${same.map(k => CROPS[k].n).join(" und ")} ${same.length > 1 ? "gehören" : "gehört"} zur selben Familie. Das fördert Krankheiten und Bodenmüdigkeit, besser 3 bis 4 Jahre Pause.`});
+    else out.push({k: "ok", t: "Fruchtfolge passt: andere Familie als letztes Jahr."});
+  }
+  if (bed){
+    const sh = mapShade(it);
+    if (sh.f >= .08) out.push({k: sh.f >= .35 ? "warn" : "info", t: `Etwa ${Math.round(sh.f * 100)} % der Fläche liegen im Schatten von „${sh.by}“ (grobe Schätzung für Frühjahr und Herbst, Höhen angenommen).`});
+    else if (MAP().items.some(c => gkHeight(c) > 0)) out.push({k: "ok", t: "Kaum Schatten durch Haus, Bäume oder Hütte. Voll sonnig."});
+    const need = keys.filter(k => CROPS[k].sun === "v");
+    if (sh.f >= .35 && need.length) out.push({k: "warn", t: `${need.map(k => CROPS[k].n).join(", ")} brauchen volle Sonne. Hier wird der Ertrag geringer ausfallen.`});
+    const z = [...new Set(keys.map(k => CROPS[k].z))];
+    if (z.includes("s") && z.includes("w")) out.push({k: "info", t: "Starkzehrer und Schwachzehrer im selben Beet: düngen nach den Starkzehrern, Schwachzehrer brauchen weniger."});
+  }
   return out;
 }
+const GKI = {ok: "✓", warn: "!", info: "i"};
 function mapPanelHTML(){
   const it = S.mapSel && mapItem(S.mapSel);
   if (!it) return `<p class="hint">Tippe ein Element an. Ziehen verschiebt es, der blaue Punkt unten rechts ändert die Größe. Genaue Maße gibst du über „Bearbeiten“ ein.</p>`;
-  const t = MTYPES[it.type], pl = it.pids.map(plantById).filter(Boolean);
-  return `<div class="card mpanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><div class="eyebrow">${esc(t.l)}</div><h3 style="margin-top:3px">${esc(it.name || t.l)}</h3><div class="muted small mono">${fm(it.w)} × ${fm(it.h)} m${t.round ? "" : " · " + fm(r2(it.w * it.h)) + " m²"} · ${fm(it.x)} m von links, ${fm(it.y)} m von oben</div></div></div>
-    ${it.crops ? `<div><div class="lbl">Gepflanzt</div><div>${esc(it.crops)}</div></div>` : ""}
+  const t = MTYPES[it.type], pl = it.pids.map(plantById).filter(Boolean), hints = mapHints(it), todo = cropTasks([it], new Date().getMonth() + 1);
+  return `<div class="card gk-panel"><div><div class="eyebrow">${esc(t.l)}</div><h3 style="margin-top:3px">${esc(it.name || t.l)}</h3><div class="muted small mono">${fm(it.w)} × ${fm(it.h)} m${t.round ? "" : " · " + fm(r2(it.w * it.h)) + " m²"} · ${fm(it.x)} m von links, ${fm(it.y)} m von oben</div></div>
+    ${it.pl.length ? `<div class="gk-cc2">${it.pl.map(k => `<span><i style="background:${CROPS[k].c}"></i>${esc(CROPS[k].n)}</span>`).join("")}</div>` : ""}
+    ${it.crops ? `<div><div class="lbl">Weiteres</div><div>${esc(it.crops)}</div></div>` : ""}
+    ${hints.length ? `<ul class="gk-hints">${hints.map(h => `<li class="${h.k}"><b aria-hidden="true">${GKI[h.k]}</b><span>${esc(h.t)}</span></li>`).join("")}</ul>` : ""}
+    ${todo.length ? `<div><div class="lbl">Im ${MON[new Date().getMonth()]} hier zu tun</div><ul class="gk-hints">${todo.map(r => `<li class="info"><b aria-hidden="true">•</b><span><b style="display:inline">${esc(r.crop)}</b>: ${esc(r.text)}</span></li>`).join("")}</ul></div>` : ""}
     ${pl.length ? `<div class="chips">${pl.map(p => `<button class="chip" data-act="open" data-id="${esc(p.id)}">${I.leaf}${esc(p.name)}</button>`).join("")}</div>` : ""}
     ${it.note ? `<p class="muted small" style="margin:0">${esc(it.note)}</p>` : ""}
     <div class="btn-row"><button class="btn primary sm" data-act="map-edit" data-id="${esc(it.id)}">Bearbeiten</button><button class="btn sm" data-act="map-dup" data-id="${esc(it.id)}">Kopie</button><button class="btn ghost sm" data-act="map-desel">Fertig</button></div></div>`;
@@ -105,15 +157,22 @@ function mapPanelHTML(){
 function mapListHTML(){
   const items = MAP().items.slice().sort((a, b) => (MTYPES[a.type].z - MTYPES[b.type].z) || (a.name || "").localeCompare(b.name || ""));
   if (!items.length) return `<div class="empty-task">${GL.sprout}<span>Die Karte ist noch leer. Tippe auf „Element hinzufügen“, z. B. Haus, Terrasse oder ein Beet.</span></div>`;
-  return `<section class="sec"><div class="sec-head"><h2>Auf der Karte</h2><span class="count">${items.length}</span></div><div class="mlist">${items.map(it => {
+  return `<section class="sec"><div class="sec-head"><h2>Auf der Karte</h2><span class="count">${items.length}</span></div><div class="gk-list">${items.map(it => {
     const t = MTYPES[it.type], pl = it.pids.map(plantById).filter(Boolean).map(p => p.name);
-    const crops = [it.crops].concat(pl).filter(Boolean).join(", ");
-    return `<button class="mrow" data-act="map-sel" data-id="${esc(it.id)}"><span class="msw" style="background:${t.c}"></span><span style="min-width:0;flex:1"><b>${esc(it.name || t.l)}</b><span class="muted small" style="display:block">${esc(t.l)} · ${fm(it.w)} × ${fm(it.h)} m${crops ? " · " + esc(cut(crops, 70)) : ""}</span></span></button>`;
+    const crops = it.pl.map(k => CROPS[k].n).concat([it.crops], pl).filter(Boolean).join(", ");
+    return `<button class="gk-row" data-act="map-sel" data-id="${esc(it.id)}"><span class="gk-sw" style="background:${t.c}"></span><span style="min-width:0;flex:1"><b>${esc(it.name || t.l)}</b><span class="muted small" style="display:block">${esc(t.l)} · ${fm(it.w)} × ${fm(it.h)} m${crops ? " · " + esc(cut(crops, 70)) : ""}</span></span></button>`;
   }).join("")}</div></section>`;
 }
 function mapRedraw(){
-  const a = document.getElementById("mapitems"); if (!a) return;
-  a.innerHTML = mapItemsHTML();
+  const cv = document.getElementById("gk-cv"); if (!cv) return;
+  cv.innerHTML = mapCanvasHTML();
+  const p = document.getElementById("mappanel"); if (p) p.innerHTML = mapPanelHTML();
+}
+/* nur Auswahl wechseln, ohne die Zeichnung neu aufzubauen */
+function mapSelect(id){
+  S.mapSel = id;
+  document.querySelectorAll(".gk-hit").forEach(e => { const on = e.dataset.mid === id, t = MTYPES[(mapItem(e.dataset.mid) || {}).type]; e.classList.toggle("sel", on); if (t) e.style.zIndex = t.z + (on ? 10 : 0); });
+  const g = document.getElementById("gk-gripw"); if (g) g.innerHTML = mapGripHTML();
   const p = document.getElementById("mappanel"); if (p) p.innerHTML = mapPanelHTML();
 }
 function mapAfterRender(){
@@ -122,17 +181,25 @@ function mapAfterRender(){
 }
 function mapRefresh(){ if (S.tab === "garten" && S.gview === "karte") render(); }
 
+/* ----- Aufgaben aus der Karte (für Heute und Kalender) ----- */
+function mapTasksSection(title){
+  if (!MAP().items.some(i => i.pl && i.pl.length)) return "";
+  const rows = cropTasks(MAP().items, new Date().getMonth() + 1); if (!rows.length) return "";
+  return `<section class="sec"><div class="sec-head"><h2>${esc(title)}</h2><span class="count">${rows.length}</span></div><div class="gk-tasks">${rows.slice(0, 14).map(r => `<div class="gk-task"><i style="background:${CROPS[r.key].c}"></i><div><b>${esc(r.crop)}</b> ${esc(r.text)}<span class="muted small">${esc(r.where)}</span></div></div>`).join("")}</div>
+    <div class="btn-row"><button class="btn sm" data-act="map-open">Auf der Karte ansehen</button></div></section>`;
+}
+
 /* ----- Ziehen und Größe ändern ----- */
 let mdrag = null;
 document.addEventListener("pointerdown", e => {
   const t = e.target; if (!t || !t.closest) return;
-  const hnd = t.closest("[data-mh]"), el = hnd || t.closest("[data-mid]"), cv = document.getElementById("mapcv");
+  const cv = document.getElementById("gk-cv"), hnd = t.closest("[data-mh]"), el = hnd || t.closest("[data-mid]");
   S.mapBlank = !!cv && t === cv;
-  if (!el || !cv) return;
+  if (!el || !cv || !cv.contains(el)) return;
   const id = el.dataset.mh || el.dataset.mid, it = mapItem(id); if (!it) return;
   mdrag = {id, mode: hnd ? "size" : "move", sx: e.clientX, sy: e.clientY, ox: it.x, oy: it.y, ow: it.w, oh: it.h, moved: false, pid: e.pointerId, ppm: mapPpm()};
   try { cv.setPointerCapture(e.pointerId); } catch {}
-  if (S.mapSel !== id){ S.mapSel = id; mapRedraw(); }
+  if (S.mapSel !== id) mapSelect(id);
 });
 document.addEventListener("pointermove", e => {
   if (!mdrag || e.pointerId !== mdrag.pid) return;
@@ -147,7 +214,7 @@ document.addEventListener("pointermove", e => {
     it.w = r1(clamp(mdrag.ow + dx, .2, Math.max(.2, m.w - it.x)));
     it.h = r1(clamp(mdrag.oh + dy, .2, Math.max(.2, m.l - it.y)));
   }
-  mapRedraw();
+  gkUpdateItem(it);
 });
 function mapDragEnd(e){
   if (!mdrag || (e && e.pointerId != null && e.pointerId !== mdrag.pid)) return;
@@ -158,7 +225,7 @@ document.addEventListener("pointerup", mapDragEnd);
 document.addEventListener("pointercancel", mapDragEnd);
 document.addEventListener("lostpointercapture", mapDragEnd);
 document.addEventListener("click", e => {
-  if (e.target && e.target.id === "mapcv" && S.mapBlank && S.mapSel){ S.mapSel = null; mapRedraw(); }
+  if (e.target && e.target.id === "gk-cv" && S.mapBlank && S.mapSel){ mapSelect(null); }
 });
 document.addEventListener("scroll", e => { const t = e.target; if (t && t.id === "mapbox") S.mapScroll = [t.scrollLeft, t.scrollTop]; }, true);
 let mapRW = 0, mapRT;
@@ -173,7 +240,8 @@ function mapAct(a, b){
   switch (a){
     case "gview": S.gview = b.dataset.v === "karte" ? "karte" : "liste"; store.set("garten.gview", S.gview); S.mapSel = null; render(); break;
     case "map-sel": S.mapSel = id; render(); window.scrollTo(0, 0); break;
-    case "map-desel": S.mapSel = null; mapRedraw(); break;
+    case "map-desel": mapSelect(null); break;
+    case "map-open": S.gview = "karte"; store.set("garten.gview", "karte"); setTab("garten"); break;
     case "map-add": openSheet({type: "mapadd"}); break;
     case "map-new": { S.sheetErr = "";
       const t = b.dataset.type, d = MTYPES[t]; if (!d || !mapHasLot()) break;
@@ -183,7 +251,9 @@ function mapAct(a, b){
     case "map-edit": S.sheetErr = ""; openSheet({type: "mapitem", id}); break;
     case "map-dup": {
       const o = mapItem(id); if (!o) break;
-      const c = mapNormItem({...o, id: "", pids: o.pids.slice(), name: o.name ? o.name + " (Kopie)" : "", x: o.x + .5, y: o.y + .5}, m);
+      const base = (o.name || MTYPES[o.type].l).replace(/\s*\(Kopie\)/g, "").replace(/\s+\d+$/, "").trim();
+      let k = 2; while (m.items.some(i => i.name === base + " " + k)) k++;
+      const c = mapNormItem({...o, id: "", pids: o.pids.slice(), pl: o.pl.slice(), name: base + " " + k, x: Math.min(o.x + .5, m.w - o.w), y: Math.min(o.y + .5, m.l - o.h)}, m);
       m.items.push(c); mapSave(); S.mapSel = c.id; render(); break; }
     case "map-zoom": {
       const box = document.getElementById("mapbox"), cw = box ? box.scrollWidth : 0;
@@ -223,8 +293,9 @@ function mapSaveItem(){
   else if (x + w > m.w + .001) err = `Das Element ist zu breit: ${fm(x)} m Abstand plus ${fm(w)} m Breite sind mehr als die Grundstücksbreite von ${fm(m.w)} m.`;
   else if (y + h > m.l + .001) err = `Das Element ist zu lang: ${fm(y)} m Abstand plus ${fm(h)} m Länge sind mehr als die Grundstückslänge von ${fm(m.l)} m.`;
   if (err){ S.sheetErr = err; renderSheet(); return; }
-  const pids = Array.from(document.querySelectorAll(".mi-pl:checked")).map(e => e.value);
-  Object.assign(it, mapNormItem({id: it.id, type: v("mi-type"), name: v("mi-name"), x, y, w, h, crops: v("mi-crops"), pids, note: v("mi-note")}, m));
+  const pids = Array.from(document.querySelectorAll(".gk-pl:checked")).map(e => e.value);
+  const pl = Array.from(document.querySelectorAll(".gk-cp:checked")).map(e => e.value);
+  Object.assign(it, mapNormItem({id: it.id, type: v("mi-type"), name: v("mi-name"), x, y, w, h, crops: v("mi-crops"), pids, note: v("mi-note"), pl, prev: v("mi-prev")}, m));
   mapSave(); S.sheetErr = ""; S.mapSel = it.id; closeSheet(); render(); toast("Gespeichert");
 }
 function mapSaveLot(){
@@ -247,7 +318,7 @@ function mapImport(){
 function mapAddSheet(head){
   return `${head("Element hinzufügen")}
     <p class="muted small" style="margin:0">Was möchtest du auf die Karte setzen? Maße und Namen stellst du im nächsten Schritt ein.</p>
-    <div class="mtypes">${Object.entries(MTYPES).map(([k, t]) => `<button class="mtype" data-act="map-new" data-type="${k}"><span class="msw" style="background:${t.c}"></span>${esc(t.l)}</button>`).join("")}</div>`;
+    <div class="gk-types">${Object.entries(MTYPES).map(([k, t]) => `<button class="gk-type" data-act="map-new" data-type="${k}"><span class="gk-sw" style="background:${t.c}"></span>${esc(t.l)}</button>`).join("")}</div>`;
 }
 function mapItemSheet(head){
   const it = mapItem(S.sheet.id), m = MAP(); if (!it){ S.sheet = null; return ""; }
@@ -265,8 +336,11 @@ function mapItemSheet(head){
       <div class="field"><label for="mi-y">Abstand von oben</label><input id="mi-y" type="text" inputmode="decimal" autocomplete="off" value="${fm(it.y)}"></div>
     </div>
     <p class="hint" style="margin-top:-6px">In Metern, gemessen von der linken bzw. oberen Grundstücksgrenze bis zur linken oberen Ecke des Elements. Grundstück: ${fm(m.w)} × ${fm(m.l)} m.</p>
-    <div class="field"><label for="mi-crops">Was ist hier gepflanzt?</label><textarea id="mi-crops" placeholder="z. B. Tomaten, Paprika, Basilikum">${esc(it.crops)}</textarea></div>
-    ${S.plants.length ? `<div class="field"><span class="lbl">Pflanzen aus deiner Liste hier verknüpfen</span><div class="chklist">${S.plants.map(p => `<label class="chk"><input type="checkbox" class="mi-pl" value="${esc(p.id)}" ${it.pids.includes(p.id) ? "checked" : ""}><span>${esc(p.name)}</span></label>`).join("")}</div></div>` : ""}
+    <div class="field"><span class="lbl">Was wächst hier?</span><p class="hint" style="margin:0 0 8px">Wähle die Pflanzen aus. Die Karte zeichnet sie im richtigen Abstand und zeigt dir Tipps zu Nachbarn, Sonne und Fruchtfolge.</p>
+      ${Object.entries(CGROUP).map(([g, gn]) => `<div class="gk-cg"><span class="lbl">${gn}</span><div class="gk-cpl">${CROP_KEYS.filter(k => CROPS[k].g === g).map(k => `<label class="gk-cpc"><input type="checkbox" class="gk-cp" value="${k}" ${it.pl.includes(k) ? "checked" : ""}><span><i style="background:${CROPS[k].c}"></i>${esc(CROPS[k].n)}</span></label>`).join("")}</div></div>`).join("")}</div>
+    <div class="field"><label for="mi-prev">Letztes Jahr wuchs hier</label><select id="mi-prev"><option value="">weiß ich nicht / neu</option>${Object.entries(FAM).map(([k, n]) => `<option value="${k}" ${k === it.prev ? "selected" : ""}>${esc(n)}</option>`).join("")}</select><p class="hint">Für die Fruchtfolge: gleiche Familie nicht zwei Jahre hintereinander.</p></div>
+    <div class="field"><label for="mi-crops">Weitere Pflanzen (Freitext)</label><textarea id="mi-crops" placeholder="z. B. Wildblumen am Rand">${esc(it.crops)}</textarea></div>
+    ${S.plants.length ? `<div class="field"><span class="lbl">Pflanzen aus deiner Liste hier verknüpfen</span><div class="gk-chklist">${S.plants.map(p => `<label class="gk-chk"><input type="checkbox" class="gk-pl" value="${esc(p.id)}" ${it.pids.includes(p.id) ? "checked" : ""}><span>${esc(p.name)}</span></label>`).join("")}</div></div>` : ""}
     <div class="field"><label for="mi-note">Notiz</label><textarea id="mi-note" placeholder="z. B. gepflanzt am 15.5., Tropfschlauch liegt">${esc(it.note)}</textarea></div>
     ${S.sheetErr ? `<div class="err">${esc(S.sheetErr)}</div>` : ""}
     <div class="btn-row"><button class="btn primary" data-act="map-item-save">${I.check}Speichern</button></div>
@@ -315,6 +389,7 @@ function mapPrompt(txt){
   return `Du hilfst beim Zeichnen einer Gartenkarte in der Draufsicht. Alle Maße sind in Metern. Der Ursprung (0, 0) ist die obere linke Ecke des Grundstücks, x wächst nach rechts, y nach unten.
 ${mapHasLot() ? `Das Grundstück ist ${m.w} m breit (x) und ${m.l} m lang (y).` : "Das Grundstück ist noch nicht eingetragen. Entnimm Breite und Länge aus der Beschreibung."}
 Erlaubte Typen: ${Object.keys(MTYPES).join(", ")}.
+Erlaubte Pflanzen-Schlüssel für "pflanzen": ${CROP_KEYS.join(", ")}.
 Bereits vorhandene Elemente (nicht ändern, nur beachten): ${JSON.stringify(have)}
 
 Der Gärtner beschreibt, was neu eingetragen werden soll:
@@ -324,7 +399,7 @@ ${txt}
 
 Antworte NUR mit einem JSON-Objekt in genau dieser Form:
 {"grundstueck": {"breite": Zahl, "laenge": Zahl} oder null,
- "neu": [{"typ": "beet", "name": "Kurzer Name", "x": Zahl, "y": Zahl, "breite": Zahl, "laenge": Zahl, "bepflanzung": "Tomaten, Paprika"}],
+ "neu": [{"typ": "beet", "name": "Kurzer Name", "x": Zahl, "y": Zahl, "breite": Zahl, "laenge": Zahl, "bepflanzung": "nur Pflanzen, die nicht in der Liste stehen", "pflanzen": ["tomate", "paprika"]}],
  "hinweis": "Ein kurzer Satz, was du schätzen musstest oder was unklar blieb. Leer, wenn alles klar war."}
 
 Regeln:
@@ -334,7 +409,7 @@ Regeln:
 - Nenne Maße, die der Gärtner nicht angegeben hat, realistisch geschätzt und erwähne das im Hinweis.
 - Bäume, Sträucher und Einzelpflanzen haben gleiche breite und laenge (Durchmesser).
 - Neue Elemente überlappen nicht mit bereits vorhandenen, außer Beete oder Terrassen liegen auf Rasen.
-- "bepflanzung" nennt nur, was der Gärtner gesagt hat. Erfinde nichts dazu.`;
+- "pflanzen" enthält nur Schlüssel aus der Liste für das, was der Gärtner pflanzt oder gepflanzt hat. "bepflanzung" nennt nur, was nicht in der Liste steht. Erfinde nichts dazu.`;
 }
 async function mapAI(){
   const txt = str((document.getElementById("mapai-in") || {}).value || S.mapAiDraft);
@@ -349,7 +424,7 @@ async function mapAI(){
       if (!(w >= 1 && l >= 1)) throw {code: "no_lot"};
       m.w = r2(w); m.l = r2(l);
     }
-    const added = arr(r && r.neu).filter(x => x && typeof x === "object").slice(0, 60).map(x => mapNormItem({type: x.typ, name: x.name, x: x.x, y: x.y, w: x.breite, h: x.laenge, crops: x.bepflanzung}, m));
+    const added = arr(r && r.neu).filter(x => x && typeof x === "object").slice(0, 60).map(x => mapNormItem({type: x.typ, name: x.name, x: x.x, y: x.y, w: x.breite, h: x.laenge, crops: x.bepflanzung, pl: arr(x.pflanzen)}, m));
     if (!added.length) throw {code: "invalid_json"};
     m.items = m.items.concat(added); mapSave();
     S.mapAiDone = {n: added.length, note: str(r.hinweis)}; S.mapAiDraft = "";
