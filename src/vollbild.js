@@ -6,7 +6,11 @@ const GI = {
   book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M5 17a3 3 0 0 1 3-3h10M9 8h5"/></svg>'
 };
 const FTOP = 48;
-let pinch = null;
+let pinch = null, fullKey = "";
+const fullSizeKey = () => document.documentElement.clientWidth + "x" + document.documentElement.clientHeight;
+/* Nicht auf ein resize-Ereignis verlassen: WebViews melden die Drehung manchmal verspätet oder gar nicht */
+setInterval(() => { if (S.full && !mdrag && !pinch && fullSizeKey() !== fullKey) fullRefit(); }, 250);
+window.addEventListener("orientationchange", () => setTimeout(fullRefit, 300));
 const nativeBridge = (fn, ...a) => { const b = window.Android; if (b && typeof b[fn] === "function"){ try { b[fn](...a); } catch {} } };
 function fullFitPpm(){
   const m = MAP(), de = document.documentElement;
@@ -19,6 +23,7 @@ function fullOpen(){
   S.full = true; S.fullZoom = 1; S.fullScroll = [0, 0]; S.orient = "landscape";
   nativeBridge("setOrientation", "landscape"); nativeBridge("setFullscreen", true);
   render();
+  setTimeout(() => { if (S.full && S.orient === "landscape") nativeBridge("setOrientation", "landscape"); }, 700);
 }
 function fullClose(){
   if (!S.full) return;
@@ -48,7 +53,7 @@ function fullRender(){
   if (mdrag || pinch) return;
   const old = document.getElementById("mapbox"), sc = old ? [old.scrollLeft, old.scrollTop] : S.fullScroll || [0, 0];
   if (!el){ el = document.createElement("div"); el.id = "gk-full"; el.className = "gk-full"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Gartenkarte im Vollbild"); document.body.appendChild(el); }
-  document.body.classList.add("gk-isfull");
+  document.body.classList.add("gk-isfull"); fullKey = fullSizeKey();
   const m = MAP(), ppm = mapPpm(), W = m.w * ppm + GKM.L + GKM.R, H = m.l * ppm + GKM.T + GKM.B, has = !!(S.mapSel && mapItem(S.mapSel));
   el.innerHTML = `${fullBarHTML()}<div class="gk-fbody"><div class="gk-box gk-fbox" id="mapbox"><div class="gk-cv" id="gk-cv" style="width:${n1(W)}px;height:${n1(H)}px">${mapCanvasHTML()}</div></div><div class="gk-fpanel" id="mappanel" ${has ? "" : "hidden"}>${has ? mapPanelHTML() : ""}</div></div>`;
   const nb = document.getElementById("mapbox"); nb.scrollLeft = sc[0]; nb.scrollTop = sc[1]; S.fullScroll = [nb.scrollLeft, nb.scrollTop];
