@@ -76,6 +76,30 @@ final class Bridge {
         Reminder.prefs(ctx).edit().putString("sumDate", date).putString("sumTitle", title).putString("sumText", text).apply();
     }
 
+    /** Bildschirmlage für die Vollbild-Karte: "landscape", "portrait" oder "auto" (folgt dem System). */
+    @JavascriptInterface
+    public void setOrientation(final String mode) {
+        if (!(activity instanceof MainActivity)) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((MainActivity) activity).applyOrientation(mode);
+            }
+        });
+    }
+
+    /** Blendet Status- und Navigationsleiste aus (true) oder wieder ein (false). */
+    @JavascriptInterface
+    public void setFullscreen(final boolean on) {
+        if (!(activity instanceof MainActivity)) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((MainActivity) activity).applyFullscreen(on);
+            }
+        });
+    }
+
     @JavascriptInterface
     public void morningResult(String json) {
         if (result != null) result.onResult(json);

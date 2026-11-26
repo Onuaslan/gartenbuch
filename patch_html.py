@@ -269,7 +269,7 @@ function settingsSheet(head){
 '''
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-MAPJS = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in ("pflanzen.js", "kartenzeichner.js", "gartenkarte.js", "aufgaben.js"))
+MAPJS = "\n".join(open(os.path.join(HERE, "src", f), encoding="utf-8").read() for f in ("pflanzen.js", "kartenzeichner.js", "gartenkarte.js", "reihen.js", "vollbild.js", "aufgaben.js"))
 MAPCSS = open(os.path.join(HERE, "src", "gartenkarte.css"), encoding="utf-8").read()
 sub('/* ---------- boot ---------- */', BLOCK + "\n" + MAPJS + '\n/* ---------- boot ---------- */')
 DESIGNCSS = open(os.path.join(HERE, "src", "design.css"), encoding="utf-8").read()
@@ -288,6 +288,8 @@ sub('  } else if (S.sheet.type === "help"){',
   } else if (S.sheet.type === "mapitem"){ inner = mapItemSheet(head); if (!S.sheet) return;
   } else if (S.sheet.type === "maplot"){ inner = mapLotSheet(head);
   } else if (S.sheet.type === "mapai"){ inner = mapAiSheet(head);
+  } else if (S.sheet.type === "maprow"){ inner = rowSheet(head); if (!S.sheet) return;
+  } else if (S.sheet.type === "book"){ inner = bookSheet(head);
   } else if (S.sheet.type === "todo"){ inner = todoSheet(head);
   } else if (S.sheet.type === "help"){''')
 sub('    case "tab": setTab(b.dataset.tab); break;',
@@ -295,6 +297,8 @@ sub('    case "tab": setTab(b.dataset.tab); break;',
     case "gview": case "map-sel": case "map-desel": case "map-add": case "map-new": case "map-edit": case "map-dup": case "map-zoom": case "map-lot": case "map-lot-first": case "map-lot-save":
     case "map-clear": case "map-clear-no": case "map-clear-yes": case "map-import": case "map-item-save": case "map-item-del": case "map-item-del-no": case "map-item-del-yes":
     case "map-ai": case "map-ai-go": case "map-ai-stop": case "map-open": mapAct(a, b); break;
+    case "full-open": case "full-close": case "full-zoom": case "full-fit": case "full-rot": fullAct(a, b); break;
+    case "row-new": case "row-edit": case "row-sel": case "row-harvest": case "row-save": case "row-del": case "row-del-no": case "row-del-yes": case "book": rowAct(a, b); break;
     case "tk": case "tk-del": case "todo-add": case "todo-save": tkAct(a, b); break;''')
 h_start = '  <section class="sec">\n    <div class="sec-head"><h2>Heute zu tun</h2>'
 h_end = '  </section>\n  ${shopOpen().length ? `<button class="linkcard" data-act="shop">'
@@ -302,7 +306,7 @@ i = h.index(h_start); j = h.index(h_end, i)
 h = h[:i] + '  ${tasksSectionHTML()}\n  ${shopOpen().length ? `<button class="linkcard" data-act="shop">' + h[j+len(h_end):]
 sub('    ${withPlan.length ? `<section class="sec"><div class="sec-head"><h2>In deinem Garten</h2>', '    ${mapTasksSection("Aus deiner Gartenkarte")}\n    ${withPlan.length ? `<section class="sec"><div class="sec-head"><h2>In deinem Garten</h2>')
 sub('  renderTabs();\n  if (S.sheet && ["plant"', '  renderTabs(); mapAfterRender();\n  if (S.sheet && ["plant"')
-sub('S.weather = store.get("garten.weather") || null;', 'S.weather = store.get("garten.weather") || null; S.map = mapNormalize(store.get("garten.map")); S.gview = store.get("garten.gview") === "karte" ? "karte" : "liste";')
+sub('S.weather = store.get("garten.weather") || null;', 'S.weather = store.get("garten.weather") || null; S.map = mapNormalize(store.get("garten.map")); if (S.map.w > 0) mapSave(); S.gview = store.get("garten.gview") === "karte" ? "karte" : "liste";')
 
 import shutil
 shutil.copytree(os.path.join(HERE, "src", "fonts"), os.path.join(os.path.dirname(os.path.abspath(dst)), "fonts"), dirs_exist_ok=True)

@@ -59,3 +59,55 @@
 .gk-task i{margin-top:5px}
 .gk-task > div{min-width:0}
 .gk-task span{display:block}
+
+/* Reihen und Pflanzbuch */
+.gk-rows{display:flex;flex-direction:column;gap:6px}
+.gk-rw{display:flex;flex-direction:column;gap:6px;border-radius:14px}
+.gk-rw.sel{background:var(--surface-2);padding-bottom:8px}
+.gk-rwb{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:14px;padding:8px 6px;text-align:left;width:100%;color:var(--ink);min-height:48px}
+.gk-rw.sel .gk-rwb{padding-bottom:2px}
+.gk-rwb .t{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.25}
+.gk-rwb .t .muted{white-space:normal}
+.gk-rwb > i{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.gk-rwb.done{opacity:.75}
+.gk-rn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--ground);display:grid;place-items:center;font-weight:700;font-size:13px;font-family:var(--f-mono)}
+.gk-bk{display:flex;flex-direction:column;gap:2px;background:var(--surface);border-radius:16px;padding:10px 10px 8px;box-shadow:var(--shadow)}
+.gk-bkh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 4px 4px}
+.gk-bkh .t{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.gk-book{display:flex;flex-direction:column;gap:10px}
+.gk-next{display:flex;gap:10px;align-items:center;font-weight:600}
+.gk-next input{width:22px;height:22px;flex:none}
+.gk-rt2{fill:#fff;stroke:rgba(18,30,22,.85);stroke-width:3px;paint-order:stroke;stroke-linejoin:round;font-family:var(--f-body)}
+.gk-cv{isolation:isolate}
+
+/* Vollbild */
+.gk-wrap{position:relative}
+.gk-fab{position:absolute;right:8px;top:8px;width:42px;height:42px;border-radius:12px;border:0;background:var(--surface);color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,.4);display:grid;place-items:center;z-index:3}
+.gk-fab svg{width:22px;height:22px}
+body.gk-isfull{overflow:hidden}
+body.gk-isfull .tabbar{display:none}
+.gk-full{position:fixed;inset:0;z-index:30;background:var(--ground);display:flex;flex-direction:column;color:var(--ink)}
+.gk-ftop{flex:none;height:48px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:0 8px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bar,var(--ground));overflow-x:auto;scrollbar-width:none}
+.gk-ftop::-webkit-scrollbar{display:none}
+.gk-fb{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface-2);color:var(--ink);border-radius:999px;height:36px;padding:0 12px;font-weight:600;font-size:14px;white-space:nowrap}
+.gk-fb svg{width:19px;height:19px;flex:none}
+.gk-fb.ic{width:36px;padding:0;justify-content:center;font-size:20px;line-height:1}
+.gk-fb:disabled{opacity:.4}
+.gk-ft{display:flex;flex-direction:column;line-height:1.15;min-width:0;flex:none;margin-left:4px}
+.gk-ft b{font-size:14px;white-space:nowrap}
+.gk-ftop .gk-compass{width:30px;height:30px;color:var(--ink-2);flex:none}
+.gk-fsp{flex:1;min-width:4px}
+.gk-fz{display:flex;align-items:center;gap:2px;flex:none}
+.gk-fz .gk-zl{min-width:44px;text-align:center}
+.gk-fbody{position:relative;flex:1;min-height:0}
+.gk-fbox{position:absolute;inset:0;border-radius:0;overscroll-behavior:contain;max-height:none}
+.gk-fpanel{position:absolute;z-index:5;right:8px;top:8px;bottom:8px;width:min(330px,46%);overflow:auto;border-radius:18px;box-shadow:0 4px 22px rgba(0,0,0,.4);-webkit-overflow-scrolling:touch}
+.gk-fpanel .gk-panel{margin:0;min-height:100%;box-sizing:border-box}
+@media (orientation:portrait){
+  .gk-fpanel{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46%}
+  .gk-fpanel .gk-panel{min-height:0}
+}
+@media (max-width:920px){.gk-fb:not(:first-child) span{display:none}.gk-fb:not(:first-child){padding:0;width:36px;justify-content:center}}
+@media (max-width:640px){.gk-ft{display:none}.gk-fb:first-child span{display:none}.gk-fb:first-child{padding:0;width:36px;justify-content:center}}
+.gk-fpanel.l{right:auto;left:8px}
+@media (orientation:portrait){.gk-fpanel.t{top:8px;bottom:auto}.gk-fpanel.l{right:8px}}

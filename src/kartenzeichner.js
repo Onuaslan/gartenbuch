@@ -49,7 +49,7 @@ function gkDefs(ppm, usedKeys){
   p.push(`<radialGradient id="gkCrownC" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#5f9a72"/><stop offset=".6" stop-color="#33704b"/><stop offset="1" stop-color="#204c35"/></radialGradient>`);
   p.push(`<radialGradient id="gkShrub" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#9ad285"/><stop offset=".6" stop-color="#5aa95a"/><stop offset="1" stop-color="#3b7a45"/></radialGradient>`);
   p.push(`<filter id="gkBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter><filter id="gkBlur2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter>`);
-  usedKeys.forEach(k => { const c = CROPS[k]; if (c) p.push(`<radialGradient id="gkp-${k}" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="${gkShade(c.c, .35)}"/><stop offset=".6" stop-color="${c.c}"/><stop offset="1" stop-color="${gkShade(c.c, -.3)}"/></radialGradient>`); });
+  usedKeys.forEach(k => { const c = k === "_c" ? GK_CUSTOM : CROPS[k]; if (c) p.push(`<radialGradient id="gkp-${k}" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="${gkShade(c.c, .35)}"/><stop offset=".6" stop-color="${c.c}"/><stop offset="1" stop-color="${gkShade(c.c, -.3)}"/></radialGradient>`); });
   return `<defs>${p.join("")}</defs>`;
 }
 function gkShade(hex, f){
@@ -62,9 +62,9 @@ const gkFruit = nm => /apfel/i.test(nm) ? "#d6362c" : /birne/i.test(nm) ? "#cdd6
 const gkConifer = nm => /fichte|tanne|kiefer|thuja|zypress|eibe|wacholder|lebensbaum/i.test(nm);
 
 /* ----- ein Pflanzensymbol (Draufsicht) ----- */
-function gkPlant(k, cx, cy, r, rnd){
-  const c = CROPS[k]; if (!c) return "";
-  const fill = `url(#gkp-${k})`;
+function gkPlant(k, c, cx, cy, r, rnd){
+  if (!c) return "";
+  const fill = `url(#gkp-${CROPS[k] ? k : "_c"})`;
   let s = `<g transform="translate(${n1(cx)} ${n1(cy)})"><circle cx="${n1(r * .22)}" cy="${n1(r * .3)}" r="${n1(r * .95)}" fill="#000" opacity=".22"/>`;
   if (c.t === "f"){
     const len = r * 1.05, w = Math.max(1, r * .3);
@@ -85,20 +85,19 @@ function gkPlant(k, cx, cy, r, rnd){
   }
   return s + "</g>";
 }
-/* ----- Pflanzen im Beet nach Abstandsraster (Anzahl in Metern berechnet, identisch zu den Hinweisen) ----- */
+/* ----- Pflanzen im Beet: Reihe für Reihe (Zahl und Abstand wie in den Hinweisen) ----- */
 const gkWall = it => it.type === "hochbeet" ? .06 : .08;
-function gkBedPlants(it, ppm, ix, iy, iw, ih){
-  const keys = (it.pl || []).filter(k => CROPS[k]); if (!keys.length) return "";
-  const rnd = gkRand(gkHash(it.id + "p")), wm = gkWall(it), lay = cropLayout(Math.max(.1, it.w - 2 * wm), Math.max(.1, it.h - 2 * wm), keys);
-  let out = "";
-  lay.forEach(L => {
-    const c = CROPS[L.key], span = L.span * ppm, across = L.across * ppm, stepA = span / L.nAlong, stepB = across / L.nAcross;
-    const r = clamp(Math.min(stepA, stepB) * (c.t === "f" ? .62 : .46), 2.2, ppm * .55);
-    let cnt = 0;
-    for (let a = 0; a < L.nAlong; a++) for (let b = 0; b < L.nAcross && cnt < 400; b++, cnt++){
-      const u = L.i * span + (a + .5) * stepA, v = (b + .5) * stepB;
-      out += gkPlant(L.key, L.horiz ? ix + u : ix + v, L.horiz ? iy + v : iy + u, r, rnd);
-    }
+function gkBedPlants(it, ppm, ix, iy){
+  const L = rowLayout(it); if (!L.slots) return "";
+  const rnd = gkRand(gkHash(it.id + "p")), sp = L.stripe * ppm, alongP = L.along * ppm; let out = "";
+  const at = (u, v) => L.horiz ? [ix + u, iy + v] : [ix + v, iy + u];
+  L.list.forEach(e => {
+    const v = (e.pos + .5) * sp, sel = S.rowSel === e.r.id;
+    if (sel){ const [x0, y0] = at(0, e.pos * sp); out += `<rect x="${n1(x0)}" y="${n1(y0)}" width="${n1(L.horiz ? alongP : sp)}" height="${n1(L.horiz ? sp : alongP)}" fill="#fff" fill-opacity=".22" stroke="#fff" stroke-width="1.6" stroke-dasharray="4 3" rx="2"/>`; }
+    const [a0, b0] = at(0, v), [a1, b1] = at(alongP, v);
+    out += `<path d="M${n1(a0)} ${n1(b0)}L${n1(a1)} ${n1(b1)}" stroke="#000" stroke-opacity=".28" stroke-width="${n1(clamp(sp * .22, 1.5, 6))}" stroke-linecap="round"/>`;
+    const step = e.stepA * ppm, r = clamp(Math.min(step, sp) * (e.c.t === "f" ? .62 : .46), 2.2, ppm * .55);
+    for (let a = 0; a < e.nAlong && a < 200; a++){ const [cx, cy] = at((a + .5) * step, v); out += gkPlant(e.r.key, e.c, cx, cy, r, rnd); }
   });
   return out;
 }
@@ -194,10 +193,15 @@ function gkDrawItem(it, m, ppm){
   }
 }
 /* ----- Beschriftung (Halo-Text, immer oben) ----- */
-function gkLabel(it, ppm){
-  const t = MTYPES[it.type], w = it.w * ppm, h = it.h * ppm, nm = it.name || t.l, hasPl = (it.pl || []).length > 0;
-  const cropNames = (it.pl || []).map(k => CROPS[k] ? CROPS[k].n : "").filter(Boolean).join(", ") || it.crops || "";
+const gkLabel = (it, ppm) => gkLabelText(it, ppm) + gkRowBadges(it, ppm);
+function gkLabelText(it, ppm){
+  const t = MTYPES[it.type], w = it.w * ppm, h = it.h * ppm, nm = it.name || t.l, hasPl = mapCropNames(it).length > 0;
+  const cropNames = mapCropNames(it).join(", ") || it.crops || "";
   const cw = (txt, fs) => txt.length * fs * .6;
+  if (mapIsBed(it) && rowsAct(it).length && it.y * ppm >= 16){ // Bett mit Reihen: Name über das Beet, damit die Pflanzen sichtbar bleiben
+    const f = ppm >= 20 ? 11 : 9.5, maxw = Math.max(w, 110), n = Math.floor(maxw / (f * .6)) - 1, txt = nm.length > n ? nm.slice(0, Math.max(3, n)) + "…" : nm;
+    return `<g class="gk-lbl" transform="translate(${n1(w / 2)} -5)"><text y="0" font-size="${f}" font-weight="700">${esc(txt)}</text></g>`;
+  }
   const vertical = w < h * .55 && w < 60 && h >= 40, avail = vertical ? h : w * (t.round ? .85 : 1), area = vertical ? w : h;
   let fs = Math.min(clamp(avail / Math.max(5, nm.length) * 1.75, 8, 13), area * .8);
   if (fs < 8.5 || (hasPl && vertical && area < 22)) return "";
@@ -209,6 +213,19 @@ function gkLabel(it, ppm){
   let out = `<g class="gk-lbl" transform="translate(${n1(w / 2)} ${n1(cy)})${vertical ? " rotate(-90)" : ""}"><text y="${l2 ? -3 : fs * .35}" font-size="${n1(fs)}" font-weight="700">${esc(l1)}</text>`;
   if (l2) out += `<text y="${n1(fs * .35 + 11)}" font-size="10" font-weight="500">${esc(l2)}</text>`;
   return out + "</g>";
+}
+/* Reihennummern (und bei viel Platz der Name) am Anfang jeder Reihe */
+function gkRowBadges(it, ppm){
+  if (!mapIsBed(it)) return "";
+  const L = rowLayout(it), sp = L.stripe * ppm; if (!L.slots || sp < 12) return "";
+  const br = clamp(sp * .38, 5, 9), off = L.wm * ppm; let out = "";
+  L.list.forEach(e => {
+    const u = off + br + 2, v = off + (e.pos + .5) * sp, x = L.horiz ? u : v, y = L.horiz ? v : u, sel = S.rowSel === e.r.id;
+    out += `<g class="gk-rb"><circle cx="${n1(x)}" cy="${n1(y)}" r="${n1(br)}" fill="${sel ? "#fff" : "rgba(18,30,22,.88)"}" stroke="${sel ? "#18301f" : "#fff"}" stroke-width="1.2"/><text x="${n1(x)}" y="${n1(y + br * .38)}" font-size="${n1(br * 1.15)}" font-weight="700" text-anchor="middle" fill="${sel ? "#18301f" : "#fff"}" stroke="none" style="paint-order:normal">${e.pos + 1}</text>`;
+    if (ppm >= 30 && sp >= 16 && L.horiz) out += `<text class="gk-rt2" x="${n1(x + br + 4)}" y="${n1(y + 3.5)}" font-size="11" font-weight="600" text-anchor="start">${esc(rowName(e.r))}</text>`;
+    out += `</g>`;
+  });
+  return out;
 }
 /* ----- gesamte Karte ----- */
 function gkRulers(m, ppm){
@@ -237,7 +254,7 @@ function gkLabelGroups(m, ppm){
 }
 function gkSvgHTML(m, ppm){
   const W = m.w * ppm, H = m.l * ppm, tw = W + GKM.L + GKM.R, th = H + GKM.T + GKM.B;
-  const used = [...new Set(m.items.flatMap(i => i.pl || []))];
+  const used = [...new Set(m.items.flatMap(i => mapIsBed(i) ? rowsAct(i).map(r => CROPS[r.key] ? r.key : "_c") : []))];
   let grid = "";
   for (let x = 1; x < m.w; x++) grid += `<path d="M${n1(GKM.L + x * ppm)} ${GKM.T}V${n1(GKM.T + H)}" stroke="#fff" stroke-opacity="${x % 5 ? .22 : .42}" stroke-width="1"/>`;
   for (let y = 1; y < m.l; y++) grid += `<path d="M${GKM.L} ${n1(GKM.T + y * ppm)}H${n1(GKM.L + W)}" stroke="#fff" stroke-opacity="${y % 5 ? .22 : .42}" stroke-width="1"/>`;

@@ -47,3 +47,10 @@ Wer eine bestehende Installation aktualisieren will, muss mit **demselben** Schl
 „Heute zu tun“ ist eine echte Abhak-Liste mit Fortschrittsbalken: Gießen (Haken setzt die Pflanze als gegossen, Rückgängig stellt sie wieder her), Frostschutz, Pflanzen mit Auffälligkeit prüfen, Monatsaufgaben aus der Gartenkarte (bleiben bis zum Abhaken stehen, auch im Kalender) und eigene Aufgaben mit Datum und Wiederholung (wöchentlich, 2-wöchentlich, monatlich).
 
 Die Morgen-Benachrichtigung (ab v2.2) nennt die offenen Aufgaben von heute, z. B. „4 Aufgaben heute: Beete abdecken, Monstera gießen …“, dazu Wetter und Warnungen. Erledigte Aufgaben fehlen darin.
+
+## Vollbild-Karte und Pflanzbuch (ab v2.3)
+
+Auf der Karte oben rechts auf das Vollbild-Symbol oder unten auf „Vollbild, quer“ tippen. Die App dreht ins Querformat, blendet Status- und Navigationsleiste aus und passt das ganze Grundstück auf den Bildschirm ein. Zoom mit zwei Fingern oder den Tasten +/−, „Einpassen“ zeigt wieder alles. Mit dem Drehen-Knopf wechselst du zwischen Quer- und Hochformat. Zurück-Taste oder „Schließen“ beendet das Vollbild.
+
+Beete und Hochbeete werden **Reihe für Reihe** bepflanzt: Beet antippen, „Reihe pflanzen“, Pflanze und Pflanzdatum wählen. Reihe 1 liegt oben (bei hochkant stehenden Beeten links). Tippt man auf einen Streifen im Beet, ist diese Reihe gewählt. Abgeerntete Reihen wandern ins Archiv. Das **Pflanzbuch** (unter der Karte und im Vollbild oben) zeigt alles: Beet, Reihe, Sorte, Pflanzdatum, „vor x Tagen“, Erntezeitraum und die abgeernteten Reihen.
+

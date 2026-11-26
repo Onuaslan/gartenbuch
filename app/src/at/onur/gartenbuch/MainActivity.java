@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> filePathCallback;
     private Uri cameraUri;
     private File cameraFile;
+    private int baseUi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
             w.getDecorView().setSystemUiVisibility(w.getDecorView().getSystemUiVisibility() | 0x2000 | 0x10);
         }
 
+        baseUi = w.getDecorView().getSystemUiVisibility();
         cleanPhotoCache();
 
         web = new WebView(this);
@@ -167,12 +170,35 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Bildschirmlage umstellen; "auto" gibt die Steuerung wieder ans System. */
+    void applyOrientation(String mode) {
+        int o = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        if ("landscape".equals(mode)) o = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+        else if ("portrait".equals(mode)) o = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT;
+        setRequestedOrientation(o);
+    }
+
+    /** Vollbild ohne Status- und Navigationsleiste (wischen vom Rand holt sie kurz zurück). */
+    void applyFullscreen(boolean on) {
+        View d = getWindow().getDecorView();
+        if (on) {
+            d.setSystemUiVisibility(baseUi
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        } else {
+            d.setSystemUiVisibility(baseUi);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         final Activity self = this;
         web.evaluateJavascript(
                 "(function(){var s=document.getElementById('sheet');"
                         + "if(s&&!s.hidden){document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));return 1;}"
+                        + "if(document.getElementById('gk-full')&&window.__fullClose){window.__fullClose();return 1;}"
                         + "return 0;})()",
                 new ValueCallback<String>() {
                     @Override
