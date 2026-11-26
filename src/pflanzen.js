@@ -82,9 +82,9 @@ function cropTasks(items, month){
   const rows = [];
   items.forEach(it => (it.pl || []).forEach(k => {
     const c = CROPS[k]; if (!c) return; const where = it.name || (MTYPES[it.type] || {}).l || "";
-    const add = (arr, text) => { if (arr && arr.includes(month)) rows.push({key: k, crop: c.n, where, text}); };
+    const add = (arr, text) => { if (arr && arr.includes(month)) rows.push({key: k, crop: c.n, where, text, it: it.id}); };
     add(c.vor, "im Haus vorziehen"); add(c.saat, "direkt ins Beet säen"); add(c.pfl, k === "kartoffel" || k === "zwiebel" || k === "knoblauch" ? "stecken" : "auspflanzen");
-    if (c.ern && c.ern.includes(month) && !(c.ern.includes(month - 1 || 12))) rows.push({key: k, crop: c.n, where, text: c.g === "b" ? "beginnt zu blühen" : "Erntezeit beginnt"});
+    if (c.ern && c.ern.includes(month) && !(c.ern.includes(month - 1 || 12))) rows.push({key: k, crop: c.n, where, it: it.id, text: c.g === "b" ? "beginnt zu blühen" : "Erntezeit beginnt"});
   }));
   return rows;
 }

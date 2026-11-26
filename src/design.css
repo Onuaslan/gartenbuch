@@ -33,3 +33,26 @@
 @keyframes spLeaf{to{transform:scale(1) rotate(0)}}
 @keyframes spUp{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#splash .sp-ground,#splash .sp-stem,#splash .sp-leaf,#splash .sp-dot,#splash .sp-name,#splash .sp-sub{animation-duration:.01s;animation-delay:0s}}
+
+/* ---------- Korrekturen aus dem Praxistest ---------- */
+.empty .btn svg{width:20px;height:20px;color:inherit}
+.how .f{white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:visible}
+
+/* ---------- Aufgabenliste ---------- */
+.tk-list{display:flex;flex-direction:column;gap:8px}
+.tk{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transition:opacity .2s}
+.tk-top{display:flex;align-items:center}
+.tk-main{flex:1;min-width:0;display:flex;gap:14px;align-items:center;border:0;background:transparent;text-align:left;padding:12px 14px;min-height:64px;color:var(--ink);font:inherit;cursor:pointer}
+.tk-chk{flex:none;width:30px;height:30px;border-radius:50%;border:2.5px solid var(--tkc,var(--ink-2));display:grid;place-items:center;color:var(--leaf-ink);transition:background .15s,border-color .15s}
+.tk-chk svg{width:18px;height:18px}
+.tk.done .tk-chk{background:var(--leaf);border-color:var(--leaf)}
+.tk-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.tk-t{font-weight:600;line-height:1.25}
+.tk-s{font-size:14px;color:var(--ink-2);line-height:1.3}
+.tk.done{opacity:.7}
+.tk.done .tk-t{text-decoration:line-through;color:var(--ink-2)}
+.tk-more{padding:0 14px 12px 58px}
+.tk-x{flex:none;margin-right:10px;font-size:20px;line-height:1}
+.tk-sep{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:10px 2px 0}
+.tk-prog{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin:-2px 0 10px}
+.tk-prog i{display:block;height:100%;background:var(--leaf);border-radius:999px;transition:width .3s}

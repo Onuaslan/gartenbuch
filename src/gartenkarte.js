@@ -27,7 +27,7 @@ function mapNormItem(o, m){
   const n = (v, dflt) => { v = numIn(v); return isFinite(v) ? v : dflt; };
   const w = clamp(n(o.w, d.w), .1, m.w), h = clamp(n(o.h, d.h), .1, m.l);
   const x = clamp(n(o.x, 0), 0, m.w - w), y = clamp(n(o.y, 0), 0, m.l - h);
-  return {id: str(o.id) || mapId(), type: t, name: str(o.name).slice(0, 60), x: r2(x), y: r2(y), w: r2(w), h: r2(h),
+  return {id: str(o.id) || mapId(), type: t, name: str(o.name).replace(/(\s*\(Kopie\))+/g, "").trim().slice(0, 60), x: r2(x), y: r2(y), w: r2(w), h: r2(h),
     crops: str(o.crops).slice(0, 300), pids: arr(o.pids).map(str).filter(Boolean).slice(0, 30), note: str(o.note).slice(0, 500),
     pl: arr(o.pl).map(str).filter((k, i, a) => CROPS[k] && a.indexOf(k) === i).slice(0, 12), prev: FAM[o.prev] ? o.prev : ""};
 }
@@ -180,14 +180,6 @@ function mapAfterRender(){
   if (b && S.mapScroll){ b.scrollLeft = S.mapScroll[0]; b.scrollTop = S.mapScroll[1]; }
 }
 function mapRefresh(){ if (S.tab === "garten" && S.gview === "karte") render(); }
-
-/* ----- Aufgaben aus der Karte (für Heute und Kalender) ----- */
-function mapTasksSection(title){
-  if (!MAP().items.some(i => i.pl && i.pl.length)) return "";
-  const rows = cropTasks(MAP().items, new Date().getMonth() + 1); if (!rows.length) return "";
-  return `<section class="sec"><div class="sec-head"><h2>${esc(title)}</h2><span class="count">${rows.length}</span></div><div class="gk-tasks">${rows.slice(0, 14).map(r => `<div class="gk-task"><i style="background:${CROPS[r.key].c}"></i><div><b>${esc(r.crop)}</b> ${esc(r.text)}<span class="muted small">${esc(r.where)}</span></div></div>`).join("")}</div>
-    <div class="btn-row"><button class="btn sm" data-act="map-open">Auf der Karte ansehen</button></div></section>`;
-}
 
 /* ----- Ziehen und Größe ändern ----- */
 let mdrag = null;

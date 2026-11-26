@@ -19,7 +19,7 @@ Android kann sie um einige Minuten verschieben. Ab Android 13 fragt die App einm
 
 ## Gartenkarte
 
-Im Reiter Garten oben auf „Karte“ tippen. Grundstücksmaße eingeben, dann Haus, Terrasse, Beete, Bäume und Einzelpflanzen mit Breite, Länge und Abstand hinzufügen. Die Karte zeichnet Rasen, Pflaster, Dach, Pool, Hochbeete und Bäume mit Schatten (Richtung nach Himmelsrichtung). Elemente lassen sich ziehen und per Punkt unten rechts vergrößern. Für Beete wählst du aus 40 Gemüse-, Kräuter-, Obst- und Blumenarten; sie werden im richtigen Pflanzabstand eingezeichnet. Die App zeigt Pflanzenzahl, gute und schlechte Nachbarn, Sonne/Schatten (grobe Schätzung) und Fruchtfolge. Fällige Aussaat-, Pflanz- und Erntearbeiten aus der Karte erscheinen auf „Heute“ und im Kalender. Mit API-Schlüssel kann man die Karte auch per Text beschreiben lassen. Unter „Grundstück und Daten“ lässt sich die Karte als Text sichern und wieder laden.
+Im Reiter Garten oben auf „Karte“ tippen. Grundstücksmaße eingeben, dann Haus, Terrasse, Beete, Bäume und Einzelpflanzen mit Breite, Länge und Abstand hinzufügen. Die Karte zeichnet Rasen, Pflaster, Dach, Pool, Hochbeete und Bäume mit Schatten (Richtung nach Himmelsrichtung). Elemente lassen sich ziehen und per Punkt unten rechts vergrößern. Für Beete wählst du aus 40 Gemüse-, Kräuter-, Obst- und Blumenarten; sie werden im richtigen Pflanzabstand eingezeichnet. Die App zeigt Pflanzenzahl, gute und schlechte Nachbarn, Sonne/Schatten (grobe Schätzung) und Fruchtfolge. Fällige Aussaat-, Pflanz- und Erntearbeiten aus der Karte erscheinen als Aufgaben. Mit API-Schlüssel kann man die Karte auch per Text beschreiben lassen. Unter „Grundstück und Daten“ lässt sich die Karte als Text sichern und wieder laden.
 
 ## Foto-Diagnose, Pflegeplan, Beetplan
 
@@ -40,3 +40,8 @@ Wer eine bestehende Installation aktualisieren will, muss mit **demselben** Schl
 - `src/index.orig.html`: Original aus dem Claude-Artifact
 - `patch_html.py`: macht daraus die eigenständige Version (Wetter über Open-Meteo, ohne Claude)
 - `app/`: Android-Hülle (WebView), Manifest, Icons
+
+
+## Aufgaben (ab v2.1)
+
+„Heute zu tun“ ist eine echte Abhak-Liste mit Fortschrittsbalken: Gießen (Haken setzt die Pflanze als gegossen, Rückgängig stellt sie wieder her), Frostschutz, Pflanzen mit Auffälligkeit prüfen, Monatsaufgaben aus der Gartenkarte (bleiben bis zum Abhaken stehen, auch im Kalender) und eigene Aufgaben mit Datum und Wiederholung (wöchentlich, 2-wöchentlich, monatlich).
