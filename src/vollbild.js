@@ -9,7 +9,12 @@ const FTOP = 48;
 let pinch = null, fullKey = "";
 const fullSizeKey = () => document.documentElement.clientWidth + "x" + document.documentElement.clientHeight;
 /* Nicht auf ein resize-Ereignis verlassen: WebViews melden die Drehung manchmal verspätet oder gar nicht */
-setInterval(() => { if (S.full && !mdrag && !pinch && fullSizeKey() !== fullKey) fullRefit(); }, 250);
+setInterval(() => {
+  if (mdrag || pinch) return;
+  if (S.full){ if (fullSizeKey() !== fullKey) fullRefit(); return; }
+  const w = document.documentElement.clientWidth;  // zurück im Normalmodus: Karte an die neue Breite anpassen
+  if (S.tab === "garten" && S.gview === "karte" && mapRW && w !== mapRW){ mapRW = w; mapRefresh(); }
+}, 250);
 window.addEventListener("orientationchange", () => setTimeout(fullRefit, 300));
 const nativeBridge = (fn, ...a) => { const b = window.Android; if (b && typeof b[fn] === "function"){ try { b[fn](...a); } catch {} } };
 function fullFitPpm(){

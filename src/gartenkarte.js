@@ -77,6 +77,7 @@ function viewMap(){
         <div class="btn-row"><button class="btn primary" data-act="map-lot-first">${I.check}Karte anlegen</button><button class="btn" data-act="map-ai">${I.spark}Lieber per Text beschreiben</button></div>
       </div>`;
   }
+  mapRW = document.documentElement.clientWidth;
   if (S.full) return `${head}<div class="empty-task">${GL.sprout}<span>Die Karte ist im Vollbild geöffnet.</span></div>`;
   const ppm = mapPpm(), W = m.w * ppm + GKM.L + GKM.R, H = m.l * ppm + GKM.T + GKM.B, zoom = S.mapZoom || 1;
   return `${head}
